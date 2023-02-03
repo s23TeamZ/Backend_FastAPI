@@ -4,7 +4,7 @@ from fastapi import FastAPI, UploadFile, File
 from shutil import copyfileobj as shutil_copyfileobj
 from os.path import join as os_path_join
 from os import remove as os_remove
-from functions import get_file_name
+from functions import get_file_name, qr_reader
 
 UPLOAD_FOLDER = "upload_images"
 
@@ -22,6 +22,11 @@ async def upload_image(file: UploadFile = File(...)):
     with open(os_path_join(UPLOAD_FOLDER, file_name), "wb") as buffer:
         shutil_copyfileobj(file.file, buffer)
     return {"Success": "Image uploaded successfully", "file_name": file_name}
+
+@app.post("/qr_read/{image_name}")
+async def image_qr_reader(image_name: str):
+    text_found = qr_reader(os_path_join(UPLOAD_FOLDER, image_name))
+    return {"Text Detected" : text_found}
 
 @app.delete("/delete_image/{image_name}")
 async def delete_image(image_name: str):
