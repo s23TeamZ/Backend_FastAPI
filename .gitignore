@@ -3,9 +3,8 @@
 
 ### Custom Folders ###
 
-test_images/
-upload_images/
-test_scripts/
+test_images/*.*
+upload_images/*.*
 
 
 ### Python ###
