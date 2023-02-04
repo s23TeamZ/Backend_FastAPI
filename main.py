@@ -21,7 +21,8 @@ async def upload_image(file: UploadFile = File(...)):
         return {"Error": "Check image extention","file_name": file.filename}
     with open(os_path_join(UPLOAD_FOLDER, file_name), "wb") as buffer:
         shutil_copyfileobj(file.file, buffer)
-    return {"Success": "Image uploaded successfully", "file_name": file_name}
+    text_found = qr_reader(os_path_join(UPLOAD_FOLDER, file_name))
+    return {"Text Detected" : text_found}
 
 @app.post("/qr_read/{image_name}")
 async def image_qr_reader(image_name: str):
