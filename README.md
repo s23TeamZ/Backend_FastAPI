@@ -26,8 +26,19 @@
     - DELETE `http://127.0.0.1:5555/delete_image/{image_name}` change `{image_name}` to string from upload request response 
     - `curl --request DELETE 'http://127.0.0.1:5555/delete_image/{image_name}'`
 
+## Docker
+- create folder `upload_images`
+- Build the Docker container
+- `docker build -t backend-fastapi .`
+- Run the Docker container
+- `docker run -it --rm --name capstone-backend-fastapi -v $PWD/upload_images:/app/upload_images:rw --network host  backend-fastapi:latest`
+- access via `http://127.0.0.1:8055/`
+
+
 ## TODO
 ### Coding
 - [ ] Image scanning technique
+### Docker
+- [ ] Improve syntax
 ### README
 - [ ] add/update API Methods, add output samples
