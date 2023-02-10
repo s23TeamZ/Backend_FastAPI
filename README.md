@@ -34,7 +34,36 @@
 - `docker run -it --rm --name capstone-backend-fastapi -v $PWD/upload_images:/app/upload_images:rw --network host  backend-fastapi:latest`
 - access via `http://127.0.0.1:8055/`
 
-
+## Testing Scripts
+- Send Multi Threaded Requests with images in folder `test_images`
+    - from main directory run -
+    - `python3 test_scripts/test_images_thread.py`
+    - edit the variables `THREADS`, `FOLDER`, `URL` if needed
+    - sample output -
+        ```bash
+        {
+            ...
+            "qr46.PNG": {
+                "Text Detected": [
+                "BEGIN:VEVENT\nSUMMARY:test\nLOCATION:bosotn\nDTSTART:20230209T195800\nDTEND:20230303T195800\nEND:VEVENT\n"
+                ]
+            },
+            "qr26.PNG": {
+                "Text Detected": [
+                "https://duckduckgo.com",
+                "https://google.com"
+                ]
+            },
+            "qr29.PNG": {
+                "Text Detected": [   "bitcoin:1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX?amount=0.05&message=test msg"
+                ]
+            },
+            ...
+        }
+        [+] Threads = 4
+        [+] length = 21
+        [+] Time = 0.7661190032958984
+        ```
 ## TODO
 ### Coding
 - [ ] Image scanning technique
