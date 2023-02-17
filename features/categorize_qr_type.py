@@ -37,15 +37,34 @@ def test_sms(text: str):
         return_val["Message"] = detect_g[2]
     return True, return_val
     
+def test_wifi(text: str):
+    if(text[0:5].upper() != "WIFI:"):
+        return False, {}
+    ssid_s = re.search(r'S:(.*?);(P:|H:|T:|;$)', text, flags=re.A)
+    pass_s = re.search(r'P:(\S*?);(S:|H:|T:|;$)', text, flags=re.A)
+    enc_s = re.search(r'T:(\w+);', text, flags=re.A)
+    hidd_s = re.search(r'H:(true|false|);', text, flags=re.A)
+    return_val = {"SSID":"", "Password": "", "Encryption": "", "Hidden":""}
+    if(ssid_s==None):
+        return False, {}
+    return_val["SSID"] = ssid_s.groups()[0].replace("\\;",";").replace("\\:",":").replace("\\\\","\\")
+    return_val["Password"] = pass_s.groups()[0] if(pass_s!=None) else ""
+    return_val["Encryption"] = enc_s.groups()[0] if(enc_s!=None) else "nopass"
+    return_val["Hidden"] = ("false" if(hidd_s.groups()[0]=='') else hidd_s.groups()[0]) if(hidd_s!=None) else "false"
 
-list_functions = [test_vcard, test_mecard, test_sms, test_coin,]
-list_func_type = ["V-Card", "ME-Card", "SMS", "Crypto Currency",]
+    return True, return_val
+
+list_functions = [test_vcard, test_mecard, test_sms, test_wifi, test_coin,]
+list_func_type = ["V-Card", "ME-Card", "SMS", "WIFI", "Crypto Currency",]
 
 def categ_qr_helper(text: str):
     ret_bool = False
     ret_val = {}
     for test_func, func_name in zip(list_functions,list_func_type):
-        ret_bool, ret_val = test_func(text=text)
+        try:
+            ret_bool, ret_val = test_func(text=text)
+        except:
+            continue
         if(ret_bool==True):
             return [func_name, ret_val]
     
