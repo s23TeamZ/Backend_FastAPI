@@ -23,5 +23,6 @@ def qr_reader(image_name: str) -> str:
         grayImage = cv2.cvtColor(org_image_read, cv2.COLOR_BGR2GRAY)
         (thresh, img) = cv2.threshold(grayImage, 127, 255, cv2.THRESH_BINARY)
         text = qr_cv_detect(img)
-    return text
+    text_l = [i for i in text]
+    return text_l
     
