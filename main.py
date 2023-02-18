@@ -5,7 +5,7 @@ from shutil import copyfileobj as shutil_copyfileobj
 from os.path import join as os_path_join
 from os import remove as os_remove
 from functions import get_file_name, qr_reader
-from url_tests import virustotal, google_safe, dns
+from url_tests import virustotal, google_safe
 
 UPLOAD_FOLDER = "upload_images"
 
@@ -26,11 +26,9 @@ async def upload_image(file: UploadFile = File(...)):
     text_found = qr_reader(os_path_join(UPLOAD_FOLDER, file_name))
     #print(text_found)
     #virustotal_result =  virustotal.is_malicious(text_found[0])
-    #googlesafe_result = google_safe.is_url_safe(text_found[0])
-    dns_result = dns.is_malicious(text_found[0])
+    googlesafe_result = google_safe.is_url_safe(text_found[0])
     #print(virustotal_result)
-    #print(googlesafe_result)
-    print(dns_result)
+    print(googlesafe_result)
     return {"Text Detected" : text_found}
 
 

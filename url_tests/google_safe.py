@@ -22,10 +22,10 @@ def is_url_safe(url):
     }
 
     response = requests.post(API_URL, headers=headers, json=payload)
-    #print(response.status_code)
+    print(response.status_code)
     if response.status_code == 200:
         response_json = json.loads(response.text)
-        #print(response_json)
+        print(response_json)
         if response_json.get('matches') is not None:
             return f"{url} is a malicious URL"
         else:
