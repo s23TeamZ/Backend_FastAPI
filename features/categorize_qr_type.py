@@ -54,8 +54,23 @@ def test_wifi(text: str):
 
     return True, return_val
 
-list_functions = [test_vcard, test_mecard, test_sms, test_wifi, test_coin,]
-list_func_type = ["V-Card", "ME-Card", "SMS", "WIFI", "Crypto Currency",]
+def test_vevent(text: str):
+    if(text[0:12].upper() == "BEGIN:VEVENT"):
+        return True, {"Text": text}
+    return False, {}
+
+def test_email(text: str):
+    if(text[0:6].upper() == "MATMSG"):
+        return True, {"Text": text}     ## TODO extract email, subject, body of mail
+    return False, {}
+
+def test_url(text: str):
+    if(text[0:6].upper() == "MATMSG"):
+        return True, {"Text": text}     ## TODO
+    return False, {}
+
+list_functions = [test_vcard, test_mecard, test_vevent, test_email, test_url, test_sms, test_wifi, test_coin,]
+list_func_type = ["V-Card", "ME-Card", "Event", "E-Mail", "URL", "SMS", "WIFI", "Crypto Currency",]
 
 def categ_qr_helper(text: str):
     ret_bool = False
