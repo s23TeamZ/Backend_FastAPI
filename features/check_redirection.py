@@ -1,14 +1,18 @@
-import requests
+from requests import get as requests_get
 
-count = 0
-def check_redirect(url1,count):
-    print(count)
-    r1=requests.get(url1,allow_redirects=False)
-    if str(r1.status_code) == "301" and count <2:
-        location=r1.headers['location']
-        count+=1
-        check_redirect(location,count)
-        
-    else:
-        print(url1)
-    return
+HEADERS = {"User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"}
+def check_redirect(url1):
+    count = 0
+    while(count<=2):
+        try:
+            r1=requests_get(url1, allow_redirects=False, headers=HEADERS)
+        except:
+            return "URL Error"
+        if(r1.status_code == 301 and count <3):
+            url1=r1.headers['location']
+            count+=1
+        else:
+            # print(count)
+            return r1.headers.get("location",url1)
+    return ""
+
