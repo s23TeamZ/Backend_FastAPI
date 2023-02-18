@@ -36,6 +36,11 @@ def test_sms(text: str):
     if(detect_g[2]!=None):
         return_val["Message"] = detect_g[2]
     return True, return_val
+
+def test_phone(text: str):
+    if(text[0:4].lower() == "tel:"):
+        return True, {"Phone_No": text[4:]}
+    return False, {}
     
 def test_wifi(text: str):
     if(text[0:5].upper() != "WIFI:"):
@@ -64,13 +69,29 @@ def test_email(text: str):
         return True, {"Text": text}     ## TODO extract email, subject, body of mail
     return False, {}
 
-def test_url(text: str):
-    if(text[0:6].upper() == "MATMSG"):
-        return True, {"Text": text}     ## TODO
+def test_email1(text: str):
+    if(text[0:5].upper() == "mail:"):
+        return True, {"Email": text[5:]}
     return False, {}
 
-list_functions = [test_vcard, test_mecard, test_vevent, test_email, test_url, test_sms, test_wifi, test_coin,]
-list_func_type = ["V-Card", "ME-Card", "Event", "E-Mail", "URL", "SMS", "WIFI", "Crypto Currency",]
+def test_url(text: str):
+    web_url_raw = re.findall(r'https::\/\/|http::\/\/|www\.|([\w\d\._-]+\.[\w\d]{1,9})', text, flags=re.A)
+    return_val = {"Domain":"", "File":{"check": False, "Name":"", "Ext":""}}
+    web_url = [i for i in web_url_raw if(i!='')]
+    web_url_len = len(web_url)
+    if(web_url_len == 0):
+        return False, {}
+    
+    return_val["Domain"] = web_url[0]
+    if(web_url_len > 1):
+        return_val["File"]["check"] = True
+        return_val["File"]["Name"] = web_url[-1]
+        return_val["File"]["Ext"] = web_url[-1][web_url[-1].find('.'):]
+    return True, return_val
+    
+
+list_functions = [test_vcard, test_mecard, test_vevent, test_phone, test_email1, test_email, test_url, test_sms, test_wifi, test_coin,]
+list_func_type = ["V-Card", "ME-Card", "Event", "Phone", "E-Mail" "E-Mail", "URL", "SMS", "WIFI", "Crypto Currency",]
 
 def categ_qr_helper(text: str):
     ret_bool = False
