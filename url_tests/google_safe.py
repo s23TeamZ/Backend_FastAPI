@@ -2,6 +2,7 @@ import requests
 import json
 
 def is_url_safe(url):
+    url="olmajhnservice.com"
     API_KEY = "AIzaSyCKxmAa9APCEZOL_47rnD19p07uoHoM8Fg"
     API_URL = "https://safebrowsing.googleapis.com/v4/threatMatches:find?key=" + API_KEY
 
