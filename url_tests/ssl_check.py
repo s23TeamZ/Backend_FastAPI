@@ -5,6 +5,7 @@ import datetime
 import hashlib
 
 def check_website(url):
+    url="https://www.google.com"
     # Check the SSL/TLS certificate
     try:
         # Extract the domain and port from the URL
@@ -46,7 +47,7 @@ def check_website(url):
         elif not http_valid:
             print(f"The website {url} is not accessible (HTTP response code {response.status_code}).")
 
-        if ssl_version[0] == 3 and ssl_version[1] >= 3:
-            print(f"The SSL/TLS protocol version for {url} is TLS 1.3.")
+        if ssl_version == "TLSv1.2" or ssl_version == "TLSv1.3":
+            print(f"The SSL/TLS protocol version for {url} is {ssl_version} and is secure")
         else:
             print(f"The SSL/TLS protocol version for {url} is not secure. Protocol version: {ssl_version}")
