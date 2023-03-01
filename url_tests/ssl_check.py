@@ -5,7 +5,6 @@ import datetime
 import hashlib
 
 def check_website(url):
-    url="https://www.google.com"
     # Check the SSL/TLS certificate
     try:
         # Extract the domain and port from the URL
