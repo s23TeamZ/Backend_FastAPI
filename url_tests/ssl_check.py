@@ -11,20 +11,19 @@ def check_website(url):
         domain, port = url.split(":")[1].strip("/"), 443
         if url.startswith("http://"):
             port = 80
-            ssl_valid = False  # Set SSL validation to False for HTTP
-        else:
-            ssl_valid = True
+            print(f"The website {url} is using HTTP and does not have an SSL/TLS certificate.")
         # Create a socket and wrap it with an SSL context if using HTTPS
-        context = ssl.create_default_context()
-        with socket.create_connection((domain, port)) as sock:
-            if port == 443:
-                with context.wrap_socket(sock, server_hostname=domain) as ssl_sock:
-                    # Check the certificate's expiration date
-                    cert = ssl_sock.getpeercert()
-                    ssl_version = ssl_sock.version()
-                    cert_expiry = cert['notAfter']
-                    cert_expiry_datetime = datetime.datetime.strptime(cert_expiry, '%b %d %H:%M:%S %Y %Z')
-                    ssl_valid = cert_expiry_datetime > datetime.datetime.now()
+        else:
+            context = ssl.create_default_context()
+            with socket.create_connection((domain, port)) as sock:
+                if port == 443:
+                    with context.wrap_socket(sock, server_hostname=domain) as ssl_sock:
+                        # Check the certificate's expiration date
+                        cert = ssl_sock.getpeercert()
+                        ssl_version = ssl_sock.version()
+                        cert_expiry = cert['notAfter']
+                        cert_expiry_datetime = datetime.datetime.strptime(cert_expiry, '%b %d %H:%M:%S %Y %Z')
+                        ssl_valid = cert_expiry_datetime > datetime.datetime.now()
 
     except Exception as e:
         print(f"Error validating certificate: {str(e)}")
@@ -39,9 +38,7 @@ def check_website(url):
         http_valid = False
 
     # Print the results
-    if port == 80:
-        print(f"The website {url} is using HTTP and does not have an SSL/TLS certificate.")
-    else:
+    if port == 443:
         if ssl_valid and http_valid:
             print(f"The SSL/TLS certificate for website {url} is not expired and the website is accessible!")
         elif not ssl_valid:
