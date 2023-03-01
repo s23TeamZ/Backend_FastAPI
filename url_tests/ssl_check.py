@@ -50,3 +50,13 @@ def check_website(url):
             print(f"The SSL/TLS protocol version for {url} is {ssl_version} and is secure")
         else:
             print(f"The SSL/TLS protocol version for {url} is not secure. Protocol version: {ssl_version}")
+
+
+
+# Possible outputs for ssl_version could include:
+
+# (2, 0) - indicating the use of SSLv2 protocol.
+# (3, 0) - indicating the use of SSLv3 protocol.
+# (3, 1) - indicating the use of TLSv1.0 protocol.
+# (3, 2) - indicating the use of TLSv1.1 protocol.
+# (3, 3) - indicating the use of TLSv1.2 or TLSv1.3 protocol.
