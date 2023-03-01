@@ -1,5 +1,5 @@
 def is_maldatabase(url):
-    with open('E:/NEU - MSCY/Capstone Project - CY7900 35732/Capstone/Backend_FastAPI/url_tests/urlhaus.abuse.ch.txt') as f:
+    with open('url_tests/urlhaus.abuse.ch.txt') as f:
         urls = [line.strip() for line in f]
     if url in urls:
         flag = 1
@@ -7,7 +7,7 @@ def is_maldatabase(url):
         flag = 2
 
 
-    with open('E:/NEU - MSCY/Capstone Project - CY7900 35732/Capstone/Backend_FastAPI/url_tests/delisted.txt') as f:
+    with open('url_tests/delisted.txt') as f:
         domains = [line.strip() for line in f]
     url_to_check = url.replace('https://', '').replace('http://', '').strip()  
     if url_to_check in domains:
