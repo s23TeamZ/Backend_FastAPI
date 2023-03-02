@@ -5,7 +5,7 @@ from shutil import copyfileobj as shutil_copyfileobj
 from os.path import join as os_path_join
 from os import remove as os_remove
 from functions import get_file_name, qr_reader
-from url_tests import virustotal, google_safe, dnscheck, maldatabase, ssl_check
+from url_tests import virustotal, google_safe, dnscheck, maldatabase, ssl_check, csp_check
 UPLOAD_FOLDER = "upload_images"
 
 app = FastAPI()
@@ -27,7 +27,8 @@ async def upload_image(file: UploadFile = File(...)):
     #virustotal_result =  virustotal.is_malicious(text_found[0])
     #googlesafe_result = google_safe.is_url_safe(text_found[0])
     #maldatabase_result = maldatabase.is_maldatabase(text_found[0])
-    ssl_check.check_website(text_found[0])
+    #ssl_check.check_website(text_found[0])
+    csp_check.check_csp_headers(text_found[0])
     #dnscheck.is_malicous(text_found[0])
     #print(virustotal_result)
     #print(googlesafe_result)
