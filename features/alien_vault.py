@@ -20,40 +20,40 @@ def check_malicious_main(params):
             if len(alerts) > 0:
                 print('Identified as potentially malicious')
                 print(str(alerts))
-                return True
+                return False
             else:
                 print('Unknown or not identified as malicious')
-                return False
+                return True
     if("host" in param_keys):
         if(params['host']):
             alerts = get_malicious.hostname(otx, params['host'])
             if len(alerts) > 0:
                 print('Identified as potentially malicious')
                 print(str(alerts))
-                return True
+                return False
             else:
                 print('Unknown or not identified as malicious')
-                return False
+                return True
     if("url" in param_keys):
         if(params['url']):
             alerts = get_malicious.url(otx, params['url'])
             if len(alerts) > 0:
                 print('Identified as potentially malicious')
                 print(str(alerts))
-                return True
+                return False
             else:
                 print('Unknown or not identified as malicious')
-                return False
+                return True
     if("hash" in param_keys):
         if(params['hash']):
             alerts =  get_malicious.file(otx, params['hash'])
             if len(alerts) > 0:
                 print('Identified as potentially malicious')
                 print(str(alerts))
-                return True
+                return False
             else:
                 print('Unknown or not identified as malicious')
-                return False
+                return True
     
     if("file" in param_keys):
         if(params['file']):
@@ -62,10 +62,10 @@ def check_malicious_main(params):
             if len(alerts) > 0:
                 print('Identified as potentially malicious')
                 print(str(alerts))
-                return True
+                return False
             else:
                 print('Unknown or not identified as malicious')
-                return False
+                return True
 
 def check_malicious(url, domain=None, ipaddr=None):
     url_c = False
