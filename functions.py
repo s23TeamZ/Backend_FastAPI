@@ -53,10 +53,11 @@ def url_testing_func(url_list: dict):
             __1, url_data = categorize_qr_type.test_url(r_url)
             url_list[qr_idx] = url_data
         try:
-            dns_score = dnscheck1.dns_init_check(url_list[qr_idx]["URL"])
+            dns_score = dnscheck1.dns_init_check(url_list[qr_idx]["Domain"])
             results[qr_idx]["DNS"] = dns_score
-        except:
+        except Exception as e:
             results[qr_idx]["DNS"] = "ERROR"
+            # print(f"\n[x] Error : {e}")
         try: 
             virus_status = virustotal.is_malicious(url=url_list[qr_idx]["URL"],
                                 domain=url_list[qr_idx]["Domain"],
