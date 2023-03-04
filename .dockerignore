@@ -6,6 +6,7 @@
 !main.py
 !requirements.txt
 !upload_images/
+!features/
 
 # Ignore unnecessary files inside allowed directories
 # This should go after the allowed directories

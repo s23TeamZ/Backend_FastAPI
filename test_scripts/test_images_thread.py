@@ -5,7 +5,8 @@ from os.path import join as os_path_join
 from os import listdir as os_listdir
 from time import time
 
-URL = "http://127.0.0.1:5555/upload_image"
+# URL = "http://127.0.0.1:5555/upload_image"
+URL = "http://35.223.231.208:8055/upload_image"
 THREADS = 4
 FOLDER = "test_images"
 
