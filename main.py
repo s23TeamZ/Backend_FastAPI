@@ -4,8 +4,7 @@ from fastapi import FastAPI, UploadFile, File
 from shutil import copyfileobj as shutil_copyfileobj
 from os.path import join as os_path_join
 from os import remove as os_remove
-from functions import get_file_name, qr_reader
-from url_tests import virustotal, google_safe
+from functions import get_file_name, qr_reader, url_testing_func
 from features import check_redirection, categorize_qr_type
 
 UPLOAD_FOLDER = "upload_images"
@@ -18,7 +17,6 @@ async def root():
 
 @app.post("/upload_image")
 async def upload_image(file: UploadFile = File(...)):
-    return_data = {}
     return_data = {}
     url_list = {}
     file_name = get_file_name(str(file.filename))
@@ -38,7 +36,9 @@ async def upload_image(file: UploadFile = File(...)):
         if(dat[0] == "URL"):
             url_list[idx_n] = dat[1]
 
-    # check_redirection.check_redirect(text_found)
+    results_testing = url_testing_func(url_list)
+    for qr_idx in results_testing:
+        return_data[qr_idx]["Result_p"] = results_testing[qr_idx]
     return return_data
 
 

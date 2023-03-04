@@ -84,10 +84,12 @@ def test_url(text: str):
     
     return_val["URL"] = text
     return_val["Domain"] = web_url[0]
+    ip_ext = re.findall(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', web_url[0])    # IP more check? >=0 <= 255
+    return_val["IP"] = ip_ext[0] if(len(ip_ext)!=0) else ''
     if(web_url_len > 1):
         return_val["File"]["check"] = True
         return_val["File"]["Name"] = web_url[-1]
-        return_val["File"]["Ext"] = web_url[-1][web_url[-1].find('.'):] # false negatives
+        return_val["File"]["Ext"] = web_url[-1][web_url[-1].find('.'):] # fix false negatives
     return True, return_val
     
 
