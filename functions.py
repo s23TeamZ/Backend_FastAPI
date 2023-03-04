@@ -24,5 +24,23 @@ def qr_reader(image_name: str) -> str:
         (thresh, img) = cv2.threshold(grayImage, 127, 255, cv2.THRESH_BINARY)
         text = qr_cv_detect(img)
     text_l = [i for i in text]
+    text_l = [i for i in text]
     return text_l
+
+def url_testing_func(url_list: dict):
+    
+    #####
+    #   URL Testing
+    #   - check redirect initially, get the final URL or max redirect limit reached
+    #   - DNS test, url_tests/dnscheck.py
+    #       - percentage % trust worthiness
+    #   - virustotal check
+    #        - based on positives and total scan calculate %
+    #   - Alien Vault
+    #       - based on the input, cvalculate the maliciousness
+    #   - calculate a total passive scan - % of trust worthiness
+    #####
+    for url in url_list:
+        break
+    pass_l
     

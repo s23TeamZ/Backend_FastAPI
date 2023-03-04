@@ -18,6 +18,8 @@ async def root():
 @app.post("/upload_image")
 async def upload_image(file: UploadFile = File(...)):
     return_data = {}
+    return_data = {}
+    url_list = {}
     file_name = get_file_name(str(file.filename))
     if(file_name == ""):
         return {"Error": "Check image extention","file_name": file.filename}
@@ -25,13 +27,15 @@ async def upload_image(file: UploadFile = File(...)):
         shutil_copyfileobj(file.file, buffer)
     text_found_l = qr_reader(os_path_join(UPLOAD_FOLDER, file_name))
     return_data["Text Detected"] = text_found_l
-    print(text_found_l)
+    # print(text_found_l)
     qr_data_ret = categorize_qr_type.categorize_qr(text_found_l)
     for idx,dat in enumerate(qr_data_ret):
         idx_n = f"QR_{idx+1}"
         return_data[idx_n] = {}
         return_data[idx_n]["QR Type"] = dat[0]
         return_data[idx_n]["Data"] = dat[1]
+        if(dat[0] == "URL"):
+            url_list[idx_n] = dat[1]
 
     # check_redirection.check_redirect(text_found)
     return return_data
