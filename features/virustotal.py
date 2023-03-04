@@ -9,11 +9,11 @@ def is_malicious(url):
         "User-Agent" : "gzip,  My Python requests library example client or username"
     }
     params = {'apikey': api_key, 'resource':url}
-    response = requests.get('https://www.virustotal.com/vtapi/v2/url/report',params=params, headers=headers)  ##We can upgrade to v3
+    response = requests.get('https://www.virustotal.com/vtapi/v2/url/report',params=params, headers=headers)
     json_response = response.json()
-    print(json_response.get('positives'))
+    print(json_response)
     if json_response.get('positives') is not None:
-        if json_response['positives'] > 0:
+        if json_response['positives'] > 3:
             print(f"{url} is a malicious URL")
             return False
         else:

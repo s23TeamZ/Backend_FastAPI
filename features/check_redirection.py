@@ -7,12 +7,13 @@ def check_redirect(url1):
         try:
             r1=requests_get(url1, allow_redirects=False, headers=HEADERS)
         except:
-            return "URL Error"
+            # return "URL Error"
+            return False
         if(r1.status_code == 301 and count <3):
             url1=r1.headers['location']
             count+=1
         else:
             # print(count)
             return r1.headers.get("location",url1)
-    return ""
+    return False
 

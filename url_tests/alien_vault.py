@@ -20,32 +20,40 @@ def check_malicious(params):
             if len(alerts) > 0:
                 print('Identified as potentially malicious')
                 print(str(alerts))
+                return True
             else:
                 print('Unknown or not identified as malicious')
+                return False
     if "host" in param_keys:
         if params['host']:
             alerts = get_malicious.hostname(otx, params['host'])
             if len(alerts) > 0:
                 print('Identified as potentially malicious')
                 print(str(alerts))
+                return True
             else:
                 print('Unknown or not identified as malicious')
+                return False
     if "url" in param_keys:
         if params['url']:
             alerts = get_malicious.url(otx, params['url'])
             if len(alerts) > 0:
                 print('Identified as potentially malicious')
                 print(str(alerts))
+                return True
             else:
                 print('Unknown or not identified as malicious')
+                return False
     if "hash" in param_keys:
         if params['hash']:
             alerts =  get_malicious.file(otx, params['hash'])
             if len(alerts) > 0:
                 print('Identified as potentially malicious')
                 print(str(alerts))
+                return True
             else:
                 print('Unknown or not identified as malicious')
+                return False
     
     if "file" in param_keys:
         if params['file']:
@@ -54,13 +62,16 @@ def check_malicious(params):
             if len(alerts) > 0:
                 print('Identified as potentially malicious')
                 print(str(alerts))
+                return True
             else:
                 print('Unknown or not identified as malicious')
+                return False
 
 
-if __name__ == "__main__":
-    params={'ip':'185.209.29.94'}
-    check_malicious(params)
+
+# if __name__ == "__main__":
+#     params={'ip':'23.228.203.130'}
+#     check_malicious(params)
 
 
 #main()    
