@@ -1,5 +1,9 @@
+requests
 fastapi
 uvicorn
 python-multipart
 websockets
 opencv-python
+OTXv2
+trio
+ipwhois

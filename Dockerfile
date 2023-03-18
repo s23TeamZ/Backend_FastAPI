@@ -9,6 +9,8 @@ RUN apt-get -qq update \
 COPY main.py /app/
 COPY functions.py /app/
 COPY requirements.txt /app/
+RUN mkdir /app/features/
+COPY ./features/ /app/features/
 
 RUN pip3 install -r /app/requirements.txt
 
