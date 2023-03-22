@@ -1,7 +1,7 @@
 
 import uuid
 import cv2
-from features import check_redirection, dnscheck1, virustotal, alien_vault
+from features import check_redirection, dnscheck1, virustotal, alien_vault, csp, ssl
 from features import categorize_qr_type
 def get_file_name(file_name: str) -> str:
     if(file_name.lower().endswith(('.png', '.jpg', '.jpeg', '.jpe', '.jif', '.jfif', '.jfi'))):
@@ -73,6 +73,16 @@ def url_testing_func(url_list: dict):
             results[qr_idx]["AlienVault"] = alien_vault_status
         except:
             results[qr_idx]["AlienVault"] = "ERROR"
+        try:
+            csp_status = csp.check_csp_headers(url_list[qr_idx]["URL"])
+            results[qr_idx]["csp"] = csp_status
+        except:
+            results[qr_idx]["csp"] = "ERROR"
+        try:
+            ssl_status = ssl.check_website(url_list[qr_idx]["URL"])
+            results[qr_idx]["ssl"] = ssl_status
+        except:
+            results[qr_idx]["ssl"] = "ERROR"
     return results
 
 
