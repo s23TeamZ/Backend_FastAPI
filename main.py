@@ -39,6 +39,7 @@ async def upload_image(file: UploadFile = File(...)):
     results_testing = url_testing_func(url_list)
     for qr_idx in results_testing:
         return_data[qr_idx]["Result_p"] = results_testing[qr_idx]
+        print(return_data[qr_idx]["Result_p"] )
     return return_data
 
 
