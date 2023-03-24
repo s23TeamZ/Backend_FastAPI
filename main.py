@@ -5,7 +5,7 @@ from shutil import copyfileobj as shutil_copyfileobj
 from os.path import join as os_path_join
 from os import remove as os_remove
 from functions import get_file_name, qr_reader, url_testing_func
-from features import check_redirection, categorize_qr_type
+from features import check_redirection, categorize_qr_type,dbcheck
 
 UPLOAD_FOLDER = "upload_images"
 
@@ -35,10 +35,13 @@ async def upload_image(file: UploadFile = File(...)):
         return_data[idx_n]["Data"] = dat[1]
         if(dat[0] == "URL"):
             url_list[idx_n] = dat[1]
-
-    results_testing = url_testing_func(url_list)
-    for qr_idx in results_testing:
-        return_data[qr_idx]["Result_p"] = results_testing[qr_idx]
+    url_status=dbcheck.db_check(url)
+    if url_status:
+        return_data[qr_idx]["Result_p"]= "Url is malicious"
+    else:
+        results_testing = url_testing_func(url_list)
+        for qr_idx in results_testing:
+            return_data[qr_idx]["Result_p"] = results_testing[qr_idx]
     return return_data
 
 

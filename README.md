@@ -1,5 +1,10 @@
 # Backend_FastAPI
 
+####Mongo docker
+
+- https://www.mongodb.com/languages/python
+- docker run --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass mongodb/mongodb-community-server:6.0-ubi8
+- mongodb://user:pass@localhost:27017/?authMechanism=DEFAULT (Connection String)
 
 ## Install Dependencies
 - `pip install -r requirements.txt`
