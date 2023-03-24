@@ -164,7 +164,7 @@ async def url_check(url):
 def dns_init_check(url):
     score=trio.run(url_check,url)
     # score = url_check(url)
-    total=((7-score)/100)*100
+    total=((7-score)/7)*100
     return total
     #score=url_check("google.com")
     #score=url_check("espaciofuturo.cl")
