@@ -1,5 +1,5 @@
 from requests import get as requests_get
-
+import re
 HEADERS = {"User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"}
 def check_redirect(url1):
     count = 1
@@ -15,8 +15,12 @@ def check_redirect(url1):
         except:
             # return "URL Error"
             return False
-        if(r1.status_code == 301 and count <=5):
+        if((r1.status_code >=300 and r1.status_code<=399) and count <=5):
             url1=r1.headers['location']
+            if(not url1.startswith('http')):
+                web_url_raw = re.findall(r'https:\/\/|http:\/\/|www\.|([\w\d\._-]+\.[\w\d]{1,9})', url1)
+                web_url = [i for i in web_url_raw if(i!='')]
+                url1 = f"https://{url1[url1.find(web_url[0]):]}"
             count+=1
         else:
             # print(count)
