@@ -5,7 +5,9 @@
 - https://www.mongodb.com/languages/python
 - docker run --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass mongodb/mongodb-community-server:6.0-ubi8
 - mongodb://user:pass@localhost:27017/?authMechanism=DEFAULT (Connection String)
-
+Use the network flag while running the qrcode scanner app and mongodb container.
+ -  docker run --name mongodb -d --network mongodb -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass mongodb/mongodb-community-server:6.0-ubi8
+ - docker run -it --rm --name capstone-backend-fastapi -v $PWD/upload_images:/app/upload_images:rw --network mongodb  backend-fastapi:latest
 ## Install Dependencies
 - `pip install -r requirements.txt`
 - create folders `upload_images`, `test_images`
