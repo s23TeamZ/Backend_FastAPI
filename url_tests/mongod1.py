@@ -50,6 +50,9 @@ with open("delisted.txt","r") as f1:
 
 result=collection.insert_many(url_list)
 
+collection=db["url_col_our"]
+collection=db["domain_col_our"]
+
 print(f"[+] Time : {time.time() - time_init}")
 
 

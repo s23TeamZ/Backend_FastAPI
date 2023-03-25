@@ -57,11 +57,14 @@ def url_testing_func(url_list: dict):
             __1, url_data = categorize_qr_type.test_url(r_url)
             url_list[qr_idx] = url_data
         print(f"\n\n[+] Checks for - {url_list[qr_idx]['URL']}\n")
-        db_ck, db_log = dbcheck.db_check(url=url_list[qr_idx]["URL"])
+        db_ck, db_log = dbcheck.db_check(url=url_list[qr_idx]["URL"], 
+                                        domain=url_list[qr_idx]["Domain"])
         print(f"[~] DB check : [{db_ck}] :")
         print(db_log)
         if(db_ck == False):
             results[qr_idx] = url_testing_core_func(url_list[qr_idx])
+            if(not results[qr_idx]["VirusTotal"] or not results[qr_idx]["AlienVault"]):
+                dbcheck.add_to_db(url=url_list[qr_idx]["URL"], domain=url_list[qr_idx]["Domain"])
         else:
             results[qr_idx] = {'DB':True}
         print(f"[=] Results : {results[qr_idx]}\n\n")
@@ -135,7 +138,7 @@ def url_testing_core_func(url_d):
     
     for thread in threads:
         thread.join()
-        
+
     print()
     for log in log_msgs:
         print(f"[~] {log} check : [{results[log]}] :")
