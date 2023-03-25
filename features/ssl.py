@@ -4,14 +4,16 @@ import socket
 import datetime
 import hashlib
 
-def check_website(url):
+def check_website(url, domain1):
+    log_msgs = ''
     # Check the SSL/TLS certificate
     try:
         # Extract the domain and port from the URL
-        domain, port = url.split(":")[1].strip("/"), 443
+        # domain, port = url.split(":")[1].strip("/"), 443
+        domain, port = domain1, 443
         if url.startswith("http://"):
             port = 80
-            print(f"The website {url} is using HTTP and does not have an SSL/TLS certificate.")
+            log_msgs += f"The website {url} is using HTTP and does not have an SSL/TLS certificate.\n"
         # Create a socket and wrap it with an SSL context if using HTTPS
         else:
             context = ssl.create_default_context()
@@ -26,7 +28,7 @@ def check_website(url):
                         ssl_valid = cert_expiry_datetime > datetime.datetime.now()
 
     except Exception as e:
-        print(f"Error validating certificate: {str(e)}")
+        log_msgs += f"Error validating certificate: {str(e)}\n"
         ssl_valid = False
 
     # Check the HTTP response code
@@ -34,33 +36,33 @@ def check_website(url):
         response = requests.get(url)
         http_valid = response.status_code == 200
     except Exception as e:
-        print(f"Error checking HTTP response code: {str(e)}")
+        log_msgs += f"Error checking HTTP response code: {str(e)}\n"
         http_valid = False
 
     # Print the results
     if port == 443:
         if ssl_valid and http_valid:
-            print(f"The SSL/TLS certificate for website {url} is not expired and the website is accessible!")
+            log_msgs += f"The SSL/TLS certificate for website {url} is not expired and the website is accessible!\n"
             flag1 = True
         elif not ssl_valid:
-            print(f"The SSL/TLS certificate for {url} is invalid or has expired.")
+            log_msgs += f"The SSL/TLS certificate for {url} is invalid or has expired.\n"
             flag1 = False
         elif not http_valid:
-            print(f"The website {url} is not accessible (HTTP response code {response.status_code}).")
+            log_msgs += f"The website {url} is not accessible (HTTP response code {response.status_code}).\n"
             flag1 = False
 
         if ssl_version == "TLSv1.2" or ssl_version == "TLSv1.3":
-            print(f"The SSL/TLS protocol version for {url} is {ssl_version} and is secure")
+            log_msgs += f"The SSL/TLS protocol version for {url} is {ssl_version} and is secure\n"
             flag2 = True
         else:
-            print(f"The SSL/TLS protocol version for {url} is not secure. Protocol version: {ssl_version}")
+            log_msgs += f"The SSL/TLS protocol version for {url} is not secure. Protocol version: {ssl_version}\n"
             flag2 = False
 
         
         if flag1 and flag2:
-            return True 
+            return True, log_msgs
         else:
-            return False
+            return False, log_msgs
 
 
 

@@ -75,7 +75,7 @@ def test_email1(text: str):
     return False, {}
 
 def test_url(text: str):
-    web_url_raw = re.findall(r'https::\/\/|http::\/\/|www\.|([\w\d\._-]+\.[\w\d]{1,9})', text, flags=re.A)
+    web_url_raw = re.findall(r'https:\/\/|http:\/\/|www\.|([\w\d\._-]+\.[\w\d]{1,9})', text, flags=re.A)
     return_val = {"URL":"", "Domain":"", "File":{"check": False, "Name":"", "Ext":""}}
     web_url = [i for i in web_url_raw if(i!='')]
     web_url_len = len(web_url)

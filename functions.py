@@ -3,6 +3,9 @@ import uuid
 import cv2
 from features import check_redirection, dnscheck1, virustotal, alien_vault, csp, ssl
 from features import categorize_qr_type
+import time
+from threading import Thread
+
 def get_file_name(file_name: str) -> str:
     if(file_name.lower().endswith(('.png', '.jpg', '.jpeg', '.jpe', '.jif', '.jfif', '.jfi'))):
         return f"{uuid.uuid4().hex[:10].upper()}{file_name[file_name.rfind('.'):]}"
@@ -49,43 +52,89 @@ def url_testing_func(url_list: dict):
         if(r_url==False):
             results[qr_idx] = {"ERROR":"URL Redirection error"}
             continue
+
         if(r_url!=url1):
             __1, url_data = categorize_qr_type.test_url(r_url)
             url_list[qr_idx] = url_data
-        try:
-            dns_score = dnscheck1.dns_init_check(url_list[qr_idx]["Domain"])
-            results[qr_idx]["DNS"] = dns_score
-        except Exception as e:
-            results[qr_idx]["DNS"] = "ERROR"
-            # print(f"\n[x] Error : {e}")
-        try: 
-            virus_status = virustotal.is_malicious(url=url_list[qr_idx]["URL"],
-                                domain=url_list[qr_idx]["Domain"],
-                                ipaddr=url_list[qr_idx]["IP"] if(url_list[qr_idx]["IP"]!='') else None)
-            results[qr_idx]["VirusTotal"] = virus_status
-        except:
-            results[qr_idx]["VirusTotal"] = "ERROR"
-        try:
-            alien_vault_status = alien_vault.check_malicious(url=url_list[qr_idx]["URL"],
-                                domain=url_list[qr_idx]["Domain"],
-                                ipaddr=url_list[qr_idx]["IP"] if(url_list[qr_idx]["IP"]!='') else None)
-                                            
-            results[qr_idx]["AlienVault"] = alien_vault_status
-        except:
-            results[qr_idx]["AlienVault"] = "ERROR"
-        try:
-            csp_status = csp.check_csp_headers(url_list[qr_idx]["URL"])
-            results[qr_idx]["csp"] = csp_status
-        except:
-            results[qr_idx]["csp"] = "ERROR"
-        try:
-            ssl_status = ssl.check_website(url_list[qr_idx]["URL"])
-            results[qr_idx]["ssl"] = ssl_status
-        except:
-            results[qr_idx]["ssl"] = "ERROR"
+        
+        results[qr_idx] = url_testing_core_func(url_list[qr_idx])
+        print(f"[=] Results : {results[qr_idx]}\n\n")
     return results
 
+def url_testing_core_func(url_d):
+    results = {}
+    threads = []
+    log_msgs = {}
+    def check_dns():
+        init_time = time.time()
+        try:
+            dns_score,log_m = dnscheck1.dns_init_check(url_d["Domain"])
+            results["DNS"] = dns_score
+            log_msgs["DNS"] = log_m
+        except Exception as e:
+            results["DNS"] = "ERROR"
+            log_msgs["DNS"] = f"\n[x] Error : {e}"
+        print(f"[+] Time - DNS : {time.time() - init_time}")
+    
+    def check_virustotal():
+        init_time = time.time()
+        try: 
+            virus_status,log_m = virustotal.is_malicious(url=url_d["URL"],
+                                domain=url_d["Domain"],
+                                ipaddr=url_d["IP"] if(url_d["IP"]!='') else None)
+            results["VirusTotal"] = virus_status
+            log_msgs["VirusTotal"] = log_m
+        except:
+            results["VirusTotal"] = "ERROR"
+        print(f"[+] Time - Virus Total : {time.time() - init_time}")
+    
+    def check_alien_vault():
+        init_time = time.time()
+        try:
+            alien_vault_status, log_m = alien_vault.check_malicious(url=url_d["URL"],
+                                domain=url_d["Domain"],
+                                ipaddr=url_d["IP"] if(url_d["IP"]!='') else None)
+                                            
+            results["AlienVault"] = alien_vault_status
+            log_msgs["AlienVault"] = log_m
+        except:
+            results["AlienVault"] = "ERROR"
+        print(f"[+] Time - Alien Vault : {time.time() - init_time}")
+    
+    def check_csp():
+        init_time = time.time()
+        try:
+            csp_status, log_m = csp.check_csp_headers(url_d["URL"])
+            results["csp"] = csp_status
+            log_msgs["csp"] = log_m
+        except:
+            results["csp"] = "ERROR"
+        print(f"[+] Time - CSP : {time.time() - init_time}")
+    
+    def check_ssl():
+        init_time = time.time()
+        try:
+            ssl_status, log_m = ssl.check_website(url_d["URL"], url_d["Domain"])
+            results["ssl"] = ssl_status
+            log_msgs["ssl"] = log_m
+        except:
+            results["ssl"] = "ERROR"
+        print(f"[+] Time - SSL : {time.time() - init_time}")
 
+    for i in [check_dns, check_virustotal, check_alien_vault, check_csp, check_ssl]:
+        threads.append(Thread(target=i))
+    
+    for thread in threads:
+        thread.start()
+    
+    for thread in threads:
+        thread.join()
+    print(f"\n\n[+] Checks for - {url_d['URL']}\n")
+    for log in log_msgs:
+        print(f"[~] {log} check : [{results[log]}] :")
+        print(log_msgs[log])
+    return results
+    
 
 # def url_testing(url) -> bool:
 #     # -- Check redirect 

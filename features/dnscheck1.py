@@ -15,6 +15,7 @@ import dns.asyncresolver
 async def url_check(url): 
     # try:
         score=0
+        log_msgs = ''
         #result1 = await dns.asyncresolver.resolve('tutorialspoint.com', 'A')
         #for ipval in result1:
         #    print('IP', ipval.to_text())
@@ -32,10 +33,10 @@ async def url_check(url):
         NS_records = await dns.asyncresolver.resolve(url, 'NS')
         #print(len(NS_records))
         if len(NS_records) > 2 and len(NS_records) <= 7:
-            print("OK. Name Servers between 2 and 7.")
+            log_msgs+="OK. Name Servers between 2 and 7.\n"
         else:
             score+=1
-            print("NOT OK. Name Servers not between 2 and 7.")
+            log_msgs+="NOT OK. Name Servers not between 2 and 7.\n"
 
         # Print the name servers
         #for rdata in NS_records:
@@ -51,10 +52,10 @@ async def url_check(url):
             NS_TLD.append(domains[2])
 
         if all(element == NS_TLD[0] for element in NS_TLD):
-            print("OK. NS Records are identical:", NS_TLD[0])
+            log_msgs+=f"OK. NS Records are identical: {NS_TLD[0]}\n"
         else:
             score+=1
-            print("NOT OK. NS Records are not identical:", NS_TLD)
+            log_msgs+=f"NOT OK. NS Records are not identical: {NS_TLD}\n"
 
         ##To reach your name servers via IPv4 an A record is needed for each name server.
 
@@ -69,10 +70,9 @@ async def url_check(url):
 
         if ns_a_flag == 1:
             score+=1
-            print("NOT OK. A records for each name servers NOT found")
+            log_msgs+="NOT OK. A records for each name servers NOT found\n"
         elif ns_a_flag == 0:
-            
-            print("OK. Found A records for each name servers.")
+            log_msgs+="OK. Found A records for each name servers.\n"
 
         ##To reach your name servers via IPv6 an AAAA record is needed for each name server.
 
@@ -87,9 +87,9 @@ async def url_check(url):
 
         if ns_aaaa_flag == 1:
             score+=1
-            print("NOT OK. AAAA records for each name servers NOT found")
+            log_msgs+="NOT OK. AAAA records for each name servers NOT found\n"
         elif ns_aaaa_flag == 0:
-            print("OK. Found AAAA records for each name servers.")
+            log_msgs+="OK. Found AAAA records for each name servers.\n"
 
         # RFC 2181, section 10.3 says that host name must map directly to one 
         # or more address record (A or AAAA) and must not point to any CNAME 
@@ -113,9 +113,9 @@ async def url_check(url):
 
         if ns_aaaa_flag == 1:
             score+=1
-            print("NOT OK. CNAMEs found in NS record.")
+            log_msgs+="NOT OK. CNAMEs found in NS record.\n"
         elif ns_aaaa_flag == 0:
-            print("OK. No CNAMEs found in NS record.")
+            log_msgs+="OK. No CNAMEs found in NS record.\n"
 
         ##Name servers should be dispersed (topologically and geographically) 
         ##across the Internet to avoid risk of single point of failure (RFC 2182).
@@ -133,9 +133,9 @@ async def url_check(url):
 
         if all(element == asn_list[0] for element in asn_list):
             score+=1
-            print("NOT OK. All name servers are located in one Autonomous System:", asn_list[0])
+            log_msgs+=f"NOT OK. All name servers are located in one Autonomous System: {asn_list[0]}\n"
         else:
-            print("OK. Name servers are dispersed:", asn_list)
+            log_msgs+=f"OK. Name servers are dispersed: {asn_list}\n"
 
         ###
 
@@ -151,21 +151,21 @@ async def url_check(url):
         parent_ns = soa_resp.split(" ")[4]
 
         if parent_ns in NS_names:
-            print("OK. Primary name server is listed at the parent name servers")
+            log_msgs+="OK. Primary name server is listed at the parent name servers\n"
         else:
             score+=1
-            print("NOT OK. Primary name server is not listed at the parent name servers")
-        return score
+            log_msgs+="NOT OK. Primary name server is not listed at the parent name servers\n"
+        return score, log_msgs
     # except Exception as e:
     #     score=0
     #     return score
 
 
 def dns_init_check(url):
-    score=trio.run(url_check,url)
+    score, log_msgs=trio.run(url_check,url)
     # score = url_check(url)
     total=((7-score)/7)*100
-    return total
+    return total, log_msgs
     #score=url_check("google.com")
     #score=url_check("espaciofuturo.cl")
     #print(score)
