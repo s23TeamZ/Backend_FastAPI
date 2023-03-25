@@ -67,6 +67,7 @@ def url_testing_func(url_list: dict):
                         True if(results[qr_idx]['results'].get("ERROR",None)!=None) else False))
             if(not results[qr_idx]['results']["VirusTotal"] or not results[qr_idx]['results']["AlienVault"]):
                 dbcheck.add_to_db(url=url_list[qr_idx]["URL"], domain=url_list[qr_idx]["Domain"])
+                print("[~] Added to Malicious Database")
         else:
             results[qr_idx]['results'].update({'DB':True})
         print(f"[=] Results : {results[qr_idx]}\n\n")

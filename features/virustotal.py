@@ -24,10 +24,10 @@ def is_malicious_main(url):
          
 
 def is_malicious(url, domain=None, ipaddr=None):
-    url_c = False
-    domain_c = False
-    ip_c = False
-    result_c = False
+    url_c = True
+    domain_c = True
+    ip_c = True
+    result_c = True
     log_msgs = ''
     try:
         result_c, log_m = is_malicious_main({'url':url})
