@@ -14,6 +14,7 @@ def check_csp_headers(url):
         log_msgs += f"No Content Security Policy headers found for {url}\n"
         flag_no_csp_headers = True 
         flag_only_valid_directive = False
+        return False, log_msgs
 
     # Check if the CSP headers are valid
     valid_directives = ['default-src', 'script-src', 'style-src', 'img-src', 'connect-src', 'font-src', 'object-src', 'media-src', 'frame-src', 'sandbox', 'plugin-types', 'report-uri', 'base-uri', 'form-action', 'frame-ancestors', 'manifest-src', 'worker-src', 'navigate-to']
@@ -27,6 +28,7 @@ def check_csp_headers(url):
         log_msgs += f"Invalid Content Security Policy header for {url}. Missing valid directive(s).\n"
         flag_missing_valid_directives = True
         flag_only_valid_directive = False
+        
 
          # Check for known malicious directives
         malicious_directives = ['unsafe-inline', 'unsafe-eval']

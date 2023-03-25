@@ -50,23 +50,24 @@ def url_testing_func(url_list: dict):
         results[qr_idx] = {}
         r_url=check_redirection.check_redirect(url1)
         if(r_url==False):
-            results[qr_idx] = {"ERROR":"URL Redirection error"}
+            results[qr_idx]['results'] = {"ERROR":"URL Redirection error"}
             continue
 
         if(r_url!=url1):
             __1, url_data = categorize_qr_type.test_url(r_url)
             url_list[qr_idx] = url_data
+            results[qr_idx]['url_data'] = url_data 
         print(f"\n\n[+] Checks for - {url_list[qr_idx]['URL']}\n")
         db_ck, db_log = dbcheck.db_check(url=url_list[qr_idx]["URL"], 
                                         domain=url_list[qr_idx]["Domain"])
         print(f"[~] DB check : [{db_ck}] :")
         print(db_log)
         if(db_ck == False):
-            results[qr_idx] = url_testing_core_func(url_list[qr_idx])
-            if(not results[qr_idx]["VirusTotal"] or not results[qr_idx]["AlienVault"]):
+            results[qr_idx]['results'] = url_testing_core_func(url_list[qr_idx])
+            if(not results[qr_idx]['results']["VirusTotal"] or not results[qr_idx]['results']["AlienVault"]):
                 dbcheck.add_to_db(url=url_list[qr_idx]["URL"], domain=url_list[qr_idx]["Domain"])
         else:
-            results[qr_idx] = {'DB':True}
+            results[qr_idx]['results'] = {'DB':True}
         print(f"[=] Results : {results[qr_idx]}\n\n")
     return results
 
