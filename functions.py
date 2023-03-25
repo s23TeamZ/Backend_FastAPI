@@ -48,12 +48,12 @@ def url_testing_func(url_list: dict):
     for qr_idx in url_list:
         url1 = url_list[qr_idx]["URL"]
         results[qr_idx] = {}
+        results[qr_idx]['results'] = {}
         r_url=check_redirection.check_redirect(url1)
         if(r_url==False):
             results[qr_idx]['results'] = {"ERROR":"URL Redirection error"}
-            continue
-
-        if(r_url!=url1):
+            
+        elif(r_url!=url1):
             __1, url_data = categorize_qr_type.test_url(r_url)
             url_list[qr_idx] = url_data
             results[qr_idx]['url_data'] = url_data 
@@ -63,15 +63,16 @@ def url_testing_func(url_list: dict):
         print(f"[~] DB check : [{db_ck}] :")
         print(db_log)
         if(db_ck == False):
-            results[qr_idx]['results'] = url_testing_core_func(url_list[qr_idx])
+            results[qr_idx]['results'].update(url_testing_core_func(url_list[qr_idx],
+                        True if(results[qr_idx]['results'].get("ERROR",None)!=None) else False))
             if(not results[qr_idx]['results']["VirusTotal"] or not results[qr_idx]['results']["AlienVault"]):
                 dbcheck.add_to_db(url=url_list[qr_idx]["URL"], domain=url_list[qr_idx]["Domain"])
         else:
-            results[qr_idx]['results'] = {'DB':True}
+            results[qr_idx]['results'].update({'DB':True})
         print(f"[=] Results : {results[qr_idx]}\n\n")
     return results
 
-def url_testing_core_func(url_d):
+def url_testing_core_func(url_d, flag=False):
     results = {}
     threads = []
     log_msgs = {}
@@ -131,8 +132,12 @@ def url_testing_core_func(url_d):
             results["ssl"] = "ERROR"
         print(f"[+] Time - SSL : {time.time() - init_time}")
 
-    for i in [check_dns, check_virustotal, check_alien_vault, check_csp, check_ssl]:
-        threads.append(Thread(target=i))
+    if(flag):
+        for i in [check_virustotal, check_alien_vault]:
+            threads.append(Thread(target=i))
+    else:
+        for i in [check_dns, check_virustotal, check_alien_vault, check_csp, check_ssl]:
+            threads.append(Thread(target=i))
     
     for thread in threads:
         thread.start()

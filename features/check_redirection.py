@@ -11,9 +11,10 @@ def check_redirect(url1):
     #####
     while(count<=5):    
         try:
-            r1=requests_get(url1, allow_redirects=False, headers=HEADERS)
-        except:
+            r1=requests_get(url1, allow_redirects=False, headers=HEADERS, timeout=2)
+        except Exception as e:
             # return "URL Error"
+            print(f"[!] Error Check Redirect : \n{str(e)}")
             return False
         if((r1.status_code >=300 and r1.status_code<=399) and count <=5):
             url1=r1.headers['location']
@@ -25,5 +26,5 @@ def check_redirect(url1):
         else:
             # print(count)
             return r1.headers.get("location",url1)
-    return False
+    return False, ''
 

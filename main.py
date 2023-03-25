@@ -26,8 +26,9 @@ async def upload_image(file: UploadFile = File(...)):
         shutil_copyfileobj(file.file, buffer)
     text_found_l = qr_reader(os_path_join(UPLOAD_FOLDER, file_name))
     return_data["Text Detected"] = text_found_l
-    # print(text_found_l)
+    print(f"[+] Text Detected : \n{text_found_l}")
     qr_data_ret = categorize_qr_type.categorize_qr(text_found_l)
+    print(f"[+] {qr_data_ret}")
     for idx,dat in enumerate(qr_data_ret):
         idx_n = f"QR_{idx+1}"
         return_data[idx_n] = {}
