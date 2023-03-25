@@ -37,14 +37,14 @@ def is_malicious(url, domain=None, ipaddr=None):
     if(domain!=None and domain!=''):
         try:
             domain_c, log_m = is_malicious_main({'host':domain})
-            result_c = result_c | domain_c
+            result_c = result_c & domain_c
             log_msgs += f"Host : {log_m}\n" 
         except:
             pass
     if(ipaddr!=None and ipaddr!='' and ipaddr!=domain):    
         try:
             ip_c, log_m = is_malicious_main({'ip':ipaddr})
-            result_c = result_c | ip_c
+            result_c = result_c & ip_c
             log_msgs += f"IP : {log_m}\n"
         except:
             pass
