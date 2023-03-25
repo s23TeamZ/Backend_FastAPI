@@ -7,8 +7,8 @@ try:
 
 
 except pymongo.errors.ConfigurationError:
-  print("An Invalid URI host error was received. Is your Atlas host name correct in your connection string?")
-  sys.exit(1)
+    print("An Invalid URI host error was received. Is your Atlas host name correct in your connection string?")
+    sys.exit(1)
 
 
 db=client["scan_db"]
@@ -29,22 +29,23 @@ url_lis_dict=[]
 for i in url_list:
     url_lis_dict.append({"url":i})
 
-try:
-    collection.drop()  
+# try:
+#     collection.drop()  
 
-# return a friendly error if an authentication error is thrown
-except pymongo.errors.OperationFailure:
-  print("An authentication error was received. Are your username and password correct in your connection string?")
-  sys.exit(1)
+# # return a friendly error if an authentication error is thrown
+# except pymongo.errors.OperationFailure:
+#   print("An authentication error was received. Are your username and password correct in your connection string?")
+#   sys.exit(1)
 
 result=collection.insert_many(url_lis_dict)
-
+print(result)
 
 r_url=collection.find_one({'url':"http://www.ugr.leszczynskie.net/mapa/Upfhbfhbavc1.png"})
 
+print(r_url)
 
-if r_url is None:
-    collection.insert_one({'url':"http://www.ugr.leszczynskie.net/mapa/Upfhbfhbavc1.png"})
+# if r_url is None:
+#     collection.insert_one({'url':"http://www.ugr.leszczynskie.net/mapa/Upfhbfhbavc1.png"})
 
 
 

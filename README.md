@@ -1,10 +1,6 @@
 # Backend_FastAPI
 
-####Mongo docker
 
-- https://www.mongodb.com/languages/python
-- docker run --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass mongodb/mongodb-community-server:6.0-ubi8
-- mongodb://user:pass@localhost:27017/?authMechanism=DEFAULT (Connection String)
 
 ## Install Dependencies
 - `pip install -r requirements.txt`
@@ -16,6 +12,18 @@
 - `uvicorn main:app --host 0.0.0.0 --port 5555 --workers 4 --log-level critical`
 - Run for testing
 - `uvicorn main:app --host 0.0.0.0 --port 5555 --reload`
+
+## Mongo docker
+
+- https://www.mongodb.com/languages/python
+- docker run --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass mongodb/mongodb-community-server:6.0-ubi8
+- mongodb://user:pass@localhost:27017/?authMechanism=DEFAULT (Connection String)
+#### Use the network flag while running the qrcode scanner app and mongodb container.
+-  docker run --name mongodb -d --network mongodb -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass mongodb/mongodb-community-server:6.0-ubi8
+- docker run -it --rm --name capstone-backend-fastapi -v $PWD/upload_images:/app/upload_images:rw --network mongodb  backend-fastapi:latest
+
+#### Run command MongoDB
+- `docker run --name mongodb -d --network host -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass mongodb/mongodb-community-server:6.0-ubi8`
 
 ## API Methods
 - Test GET request
@@ -32,11 +40,11 @@
     - `curl --request DELETE 'http://127.0.0.1:5555/delete_image/{image_name}'`
 
 ## Docker
-- create folder `upload_images`
+- create folder `upload_images` - not required
 - Build the Docker container
 - `docker build -t backend-fastapi .`
 - Run the Docker container
-- `docker run -it --rm --name capstone-backend-fastapi -v $PWD/upload_images:/app/upload_images:rw --network host  backend-fastapi:latest`
+- `docker run -it --rm --name capstone-backend-fastapi --network host backend-fastapi:latest`
 - access via `http://127.0.0.1:8055/`
 
 ## Testing Scripts

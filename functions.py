@@ -1,7 +1,7 @@
 
 import uuid
 import cv2
-from features import check_redirection, dnscheck1, virustotal, alien_vault, csp, ssl
+from features import check_redirection, dnscheck1, virustotal, alien_vault, csp, ssl, dbcheck
 from features import categorize_qr_type
 import time
 from threading import Thread
@@ -56,8 +56,14 @@ def url_testing_func(url_list: dict):
         if(r_url!=url1):
             __1, url_data = categorize_qr_type.test_url(r_url)
             url_list[qr_idx] = url_data
-        
-        results[qr_idx] = url_testing_core_func(url_list[qr_idx])
+        print(f"\n\n[+] Checks for - {url_list[qr_idx]['URL']}\n")
+        db_ck, db_log = dbcheck.db_check(url=url_list[qr_idx]["URL"])
+        print(f"[~] DB check : [{db_ck}] :")
+        print(db_log)
+        if(db_ck == False):
+            results[qr_idx] = url_testing_core_func(url_list[qr_idx])
+        else:
+            results[qr_idx] = {'DB':True}
         print(f"[=] Results : {results[qr_idx]}\n\n")
     return results
 
@@ -129,7 +135,8 @@ def url_testing_core_func(url_d):
     
     for thread in threads:
         thread.join()
-    print(f"\n\n[+] Checks for - {url_d['URL']}\n")
+        
+    print()
     for log in log_msgs:
         print(f"[~] {log} check : [{results[log]}] :")
         print(log_msgs[log])

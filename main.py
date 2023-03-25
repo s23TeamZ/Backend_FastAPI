@@ -5,7 +5,7 @@ from shutil import copyfileobj as shutil_copyfileobj
 from os.path import join as os_path_join
 from os import remove as os_remove
 from functions import get_file_name, qr_reader, url_testing_func
-from features import check_redirection, categorize_qr_type,dbcheck
+from features import categorize_qr_type
 
 UPLOAD_FOLDER = "upload_images"
 
