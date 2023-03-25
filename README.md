@@ -24,6 +24,8 @@
 
 #### Run command MongoDB
 - `docker run --name mongodb -d --network host -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=user -e MONGO_INITDB_ROOT_PASSWORD=pass mongodb/mongodb-community-server:6.0-ubi8`
+- start container again - 
+    - `docker start -a -i <Container ID>` --> -a attach, -i interactive
 
 ## API Methods
 - Test GET request
