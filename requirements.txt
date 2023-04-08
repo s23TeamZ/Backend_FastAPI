@@ -8,3 +8,4 @@ OTXv2
 trio
 ipwhois
 pymongo
+numpy

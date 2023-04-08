@@ -5,6 +5,12 @@ from features import check_redirection, dnscheck1, virustotal, alien_vault, csp,
 from features import categorize_qr_type
 import time
 from threading import Thread
+from multiprocessing.pool import ThreadPool
+import requests
+import base64
+import numpy as np
+
+DYN_TEST_URL = "http://127.0.0.1:7077/upload_url"
 
 def get_file_name(file_name: str) -> str:
     if(file_name.lower().endswith(('.png', '.jpg', '.jpeg', '.jpe', '.jif', '.jfif', '.jfi'))):
@@ -28,8 +34,37 @@ def qr_reader(image_name: str) -> str:
         (thresh, img) = cv2.threshold(grayImage, 127, 255, cv2.THRESH_BINARY)
         text = qr_cv_detect(img)
     text_l = [i for i in text]
-    text_l = [i for i in text]
+    # text_l = [i for i in text]
     return text_l
+
+def qr_cv_detect1(img) -> str:
+    detector = cv2.QRCodeDetector()
+    retrivel, decoded_info, points,st_qrcode = detector.detectAndDecodeMulti(img)
+    if(len(decoded_info)>0):
+        return decoded_info
+    else:
+        return ""
+
+def qr_reader1(img_txt: str) -> str:
+    # img = cv2.imread(image_name)
+    img = from_base64(img_txt)
+    text = qr_cv_detect1(img)
+    if(text==""):
+        # org_image_read = cv2.imread(image_name)
+        org_image_read = img
+        grayImage = cv2.cvtColor(org_image_read, cv2.COLOR_BGR2GRAY)
+        (thresh, img) = cv2.threshold(grayImage, 127, 255, cv2.THRESH_BINARY)
+        text = qr_cv_detect1(img)
+    text_l = [i for i in text]
+    # text_l = [i for i in text]
+    return text_l
+
+def to_image_string(image_filepath):
+    return base64.b64encode(open(image_filepath, 'rb').read())
+
+def from_base64(base64_data):
+    nparr = np.fromstring(base64.b64decode(base64_data), np.uint8)
+    return cv2.imdecode(nparr, cv2.IMREAD_ANYCOLOR)
 
 def url_testing_func(url_list: dict):
     
@@ -64,8 +99,9 @@ def url_testing_func(url_list: dict):
         print(db_log)
         if(db_ck == False):
             results[qr_idx]['results'].update(url_testing_core_func(url_list[qr_idx],
-                        True if(results[qr_idx]['results'].get("ERROR",None)!=None) else False))
-            if(not results[qr_idx]['results']["VirusTotal"] or not results[qr_idx]['results']["AlienVault"]):
+                        True if(results[qr_idx]['results'].get("ERROR",None)!=None) else False,
+                        dyn_test = True))
+            if((not results[qr_idx]['results']["VirusTotal"] or not results[qr_idx]['results']["AlienVault"]) and url_list[qr_idx]["Domain"] not in ['google.com']):
                 dbcheck.add_to_db(url=url_list[qr_idx]["URL"], domain=url_list[qr_idx]["Domain"])
                 print("[~] Added to Malicious Database")
         else:
@@ -73,7 +109,7 @@ def url_testing_func(url_list: dict):
         print(f"[=] Results : {results[qr_idx]}\n\n")
     return results
 
-def url_testing_core_func(url_d, flag=False):
+def url_testing_core_func(url_d, flag=False, dyn_test=False):
     results = {}
     threads = []
     log_msgs = {}
@@ -132,20 +168,53 @@ def url_testing_core_func(url_d, flag=False):
         except:
             results["ssl"] = "ERROR"
         print(f"[+] Time - SSL : {time.time() - init_time}")
-
-    if(flag):
-        for i in [check_virustotal, check_alien_vault]:
-            threads.append(Thread(target=i))
-    else:
-        for i in [check_dns, check_virustotal, check_alien_vault, check_csp, check_ssl]:
-            threads.append(Thread(target=i))
     
-    for thread in threads:
-        thread.start()
-    
-    for thread in threads:
-        thread.join()
+    def dynamic_testing():
+        init_time = time.time()
+        try:
+            dyn_test_status = requests.post(url=DYN_TEST_URL, data={'url':url_d["URL"]})
+            # dyn_test_status, log_m = alien_vault.check_malicious(url=url_d["URL"],)
+                                # domain=url_d["Domain"],
+                                # ipaddr=url_d["IP"] if(url_d["IP"]!='') else None)
+            if(dyn_test_status.status_code <200 and dyn_test_status.status_code >299):
+                raise Exception(f"Status code : {dyn_test_status.status_code()}")
+            try:
+                res_json = dyn_test_status.json()
+            except:
+                raise Exception("Data recieved is not JSON")                          
+            results["Dynamic_tests"] = res_json
+            log_msgs["Dynamic_tests"] = ''
+        except Exception as e:
+            results["Dynamic_tests"] = f"ERROR : {e}"
+        print(f"[+] Time - Dynamic Testing : {time.time() - init_time}")
 
+    check_list = [check_virustotal, check_alien_vault]
+    if(not flag):
+        check_list =  [check_dns] + check_list + [check_csp, check_ssl]
+        if(dyn_test):
+            check_list = [dynamic_testing] + check_list
+
+    tot_time_init = time.time()
+    thread_pool = ThreadPool(processes=len(check_list))
+    async_result = []
+    for func_ in check_list:
+        async_result.append(thread_pool.apply_async(func_, ()))
+    for func_ in async_result:
+        func_.get()
+
+    # if(flag):
+    #     for i in [check_virustotal, check_alien_vault]:
+    #         threads.append(Thread(target=i))
+    # else:
+    #     for i in [check_dns, check_virustotal, check_alien_vault, check_csp, check_ssl]:
+    #         threads.append(Thread(target=i))
+    
+    # for thread in threads:
+    #     thread.start()
+    
+    # for thread in threads:
+    #     thread.join()
+    print(f"[+] Total tests time : {time.time() - tot_time_init}")
     print()
     for log in log_msgs:
         print(f"[~] {log} check : [{results[log]}] :")
