@@ -129,13 +129,13 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
     def check_virustotal():
         init_time = time.time()
         try: 
-            virus_status,log_m = virustotal.is_malicious(url=url_d["URL"],
+            virus_status,vt_score,log_m = virustotal.is_malicious(url=url_d["URL"],
                                 domain=url_d["Domain"],
                                 ipaddr=url_d["IP"] if(url_d["IP"]!='') else None)
-            results["VirusTotal"] = virus_status
+            results["VirusTotal"] = vt_score
             log_msgs["VirusTotal"] = log_m
         except:
-            results["VirusTotal"] = "ERROR"
+            results["VirusTotal"] = 0
         print(f"[+] Time - Virus Total : {time.time() - init_time}")
     
     def check_alien_vault():
@@ -223,6 +223,7 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
         print(log_msgs[log])
     total_score = 0
     total_score+= results["DNS"]*0.25*0.4
+    total_score+= results["VirusTotal"]*0.5*0.65*0.4
     results["TOTAL_SCORE"] = total_score
     return results
     
