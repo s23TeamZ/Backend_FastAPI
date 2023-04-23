@@ -141,14 +141,14 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
     def check_alien_vault():
         init_time = time.time()
         try:
-            alien_vault_status, log_m = alien_vault.check_malicious(url=url_d["URL"],
+            alien_vault_status, av_score, log_m = alien_vault.check_malicious(url=url_d["URL"],
                                 domain=url_d["Domain"],
                                 ipaddr=url_d["IP"] if(url_d["IP"]!='') else None)
                                             
-            results["AlienVault"] = alien_vault_status
+            results["AlienVault"] = av_score
             log_msgs["AlienVault"] = log_m
         except:
-            results["AlienVault"] = "ERROR"
+            results["AlienVault"] = 0
         print(f"[+] Time - Alien Vault : {time.time() - init_time}")
     
     def check_csp():
@@ -224,6 +224,7 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
     total_score = 0
     total_score+= results["DNS"]*0.25*0.4
     total_score+= results["VirusTotal"]*0.5*0.65*0.4
+    total_score+= results["AlienVault"]*0.5*0.65*0.4
     results["TOTAL_SCORE"] = total_score
     return results
     
