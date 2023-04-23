@@ -164,11 +164,11 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
     def check_ssl():
         init_time = time.time()
         try:
-            ssl_status, log_m = ssl.check_website(url_d["URL"], url_d["Domain"])
-            results["ssl"] = ssl_status
+            ssl_status, ssl_score, log_m = ssl.check_website(url_d["URL"], url_d["Domain"])
+            results["ssl"] = ssl_score
             log_msgs["ssl"] = log_m
         except:
-            results["ssl"] = "ERROR"
+            results["ssl"] = 0
         print(f"[+] Time - SSL : {time.time() - init_time}")
     
     def dynamic_testing():
@@ -226,6 +226,7 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
     total_score+= results["VirusTotal"]*0.5*0.65*0.4
     total_score+= results["AlienVault"]*0.5*0.65*0.4
     total_score+= results["csp"]*0.15*0.6
+    total_score+= results["ssl"]*0.4*0.6
     results["TOTAL_SCORE"] = total_score
     return results
     
