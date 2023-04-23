@@ -181,13 +181,14 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
             if(dyn_test_status.status_code <200 and dyn_test_status.status_code >299):
                 raise Exception(f"Status code : {dyn_test_status.status_code()}")
             try:
-                res_json = dyn_test_status.json()
+                res_json = dyn_test_status.json()   # add final score in json
             except:
                 raise Exception("Data recieved is not JSON")                          
-            results["Dynamic_tests"] = res_json
+            results["Dynamic_tests"] = res_json["score"]
             log_msgs["Dynamic_tests"] = ''
         except Exception as e:
-            results["Dynamic_tests"] = f"ERROR : {e}"
+            results["Dynamic_tests"] = 0
+            log_msgs["Dynamic_tests"] = f"ERROR : {e}"
         print(f"[+] Time - Dynamic Testing : {time.time() - init_time}")
 
     check_list = [check_virustotal, check_alien_vault]
@@ -227,6 +228,7 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
     total_score+= results["AlienVault"]*0.5*0.65*0.4
     total_score+= results["csp"]*0.15*0.6
     total_score+= results["ssl"]*0.4*0.6
+    total_score+= results["Dynamic_tests"]
     results["TOTAL_SCORE"] = total_score
     return results
     
