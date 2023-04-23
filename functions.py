@@ -122,7 +122,7 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
             results["DNS"] = dns_score
             log_msgs["DNS"] = log_m
         except Exception as e:
-            results["DNS"] = "ERROR"
+            results["DNS"] = 0
             log_msgs["DNS"] = f"\n[x] Error : {e}"
         print(f"[+] Time - DNS : {time.time() - init_time}")
     
@@ -222,6 +222,7 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
         print(f"[~] {log} check : [{results[log]}] :")
         print(log_msgs[log])
     total_score = 0
+    total_score+= results["DNS"]*0.25*0.4
     results["TOTAL_SCORE"] = total_score
     return results
     
