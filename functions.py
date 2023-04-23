@@ -83,8 +83,8 @@ def url_testing_func(url_list: dict):
     for qr_idx in url_list:
         url1 = url_list[qr_idx]["URL"]
         results[qr_idx] = {}
-        results[qr_idx]['results'] = {}
-        r_url=check_redirection.check_redirect(url1)
+        results[qr_idx]['results'] = {"TOTAL_SCORE":0}
+        r_url, r_score =check_redirection.check_redirect(url1)
         if(r_url==False):
             results[qr_idx]['results'] = {"ERROR":"URL Redirection error"}
             
@@ -106,6 +106,8 @@ def url_testing_func(url_list: dict):
                 print("[~] Added to Malicious Database")
         else:
             results[qr_idx]['results'].update({'DB':True})
+        results[qr_idx]['results']["TOTAL_SCORE"] = results[qr_idx]['results']["TOTAL_SCORE"] + r_score*0.1*0.4
+        results[qr_idx]['results']["URL Redirect"] = r_score
         print(f"[=] Results : {results[qr_idx]}\n\n")
     return results
 
@@ -219,6 +221,8 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
     for log in log_msgs:
         print(f"[~] {log} check : [{results[log]}] :")
         print(log_msgs[log])
+    total_score = 0
+    results["TOTAL_SCORE"] = total_score
     return results
     
 

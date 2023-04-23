@@ -49,40 +49,47 @@
 - `docker run -it --rm --name capstone-backend-fastapi --network host backend-fastapi:latest`
 - access via `http://127.0.0.1:8055/`
 
-## Testing Scripts
-- Send Multi Threaded Requests with images in folder `test_images`
-    - from main directory run -
-    - `python3 test_scripts/test_images_thread.py`
-    - edit the variables `THREADS`, `FOLDER`, `URL` if needed
-    - sample output -
-        ```bash
-        {
-            ...
-            "qr46.PNG": {
-                "Text Detected": [
-                "BEGIN:VEVENT\nSUMMARY:test\nLOCATION:bosotn\nDTSTART:20230209T195800\nDTEND:20230303T195800\nEND:VEVENT\n"
-                ]
-            },
-            "qr26.PNG": {
-                "Text Detected": [
-                "https://duckduckgo.com",
-                "https://google.com"
-                ]
-            },
-            "qr29.PNG": {
-                "Text Detected": [   "bitcoin:1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX?amount=0.05&message=test msg"
-                ]
-            },
-            ...
-        }
-        [+] Threads = 4
-        [+] length = 21
-        [+] Time = 0.7661190032958984
-        ```
+## Scoring
+```
+Passive Tests - 40% 
+if (URL Redirection == true or Database Check == True):
+    URL redirection - 10%
+        {1:100, 2:90, 3:70, 4:50, 5:20}
+    DNS Check - 25% 
+    External APIs - 65%
+        Virus Total - 50% 
+            Start score: 100; -25 for each negative;
+        Alien Vault - 50%
+            Start score: 100; -50 for each negative;
+else 0
+
+ 
+
+Active Tests - 60%
+    TLS Certificates - 40%
+        Certificate Expired - 0
+        else SSL Version TLSv1.2, v1.3 - 100, TLSv1.1 - 70, TLSv1.0 - 35, SSLv* - 10
+    Any Downloads - 30%
+    CSP Headers - 15%
+    AdBlocker comparison - 15%
+```
+```
+DNS - 8.574 (10)	0.25*0.4
+VT - 13			0.5*0.65*0.4
+AV - 9.75 (13)		0.5*0.65*0.4
+URL r - 3.6 (4)		0.1*0.4
+CSP - 0 (9)		0.15*0.6
+SSL - 24		0.4*0.6
+DYN - 27		(0.3+0.15)*0.6
+```
+
+
 ## TODO
 ### Coding
-- [ ] Image scanning technique
+- [x] Image scanning technique
 ### Docker
-- [ ] Improve syntax
+- [x] Improve syntax
+- [ ] Automate MongoDB entries when container started
+- [ ] Write Docker compose
 ### README
-- [ ] add/update API Methods, add output samples
+- [x] add/update API Methods, add output samples
