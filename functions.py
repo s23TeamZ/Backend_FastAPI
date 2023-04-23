@@ -154,11 +154,11 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
     def check_csp():
         init_time = time.time()
         try:
-            csp_status, log_m = csp.check_csp_headers(url_d["URL"])
-            results["csp"] = csp_status
+            csp_status, csp_score, log_m = csp.check_csp_headers(url_d["URL"])
+            results["csp"] = csp_score
             log_msgs["csp"] = log_m
         except:
-            results["csp"] = "ERROR"
+            results["csp"] = 0
         print(f"[+] Time - CSP : {time.time() - init_time}")
     
     def check_ssl():
@@ -225,6 +225,7 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
     total_score+= results["DNS"]*0.25*0.4
     total_score+= results["VirusTotal"]*0.5*0.65*0.4
     total_score+= results["AlienVault"]*0.5*0.65*0.4
+    total_score+= results["csp"]*0.15*0.6
     results["TOTAL_SCORE"] = total_score
     return results
     
