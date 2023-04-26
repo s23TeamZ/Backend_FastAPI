@@ -92,16 +92,4 @@ async def upload_url(text: str = Form()):
     return return_data
     # return json.dumps(return_data, indent=4)
 
-@app.post("/qr_read/{image_name}")
-async def image_qr_reader(image_name: str):
-    text_found = qr_reader(os_path_join(UPLOAD_FOLDER, image_name))
-    return {"Text Detected" : text_found}
-
-@app.delete("/delete_image/{image_name}")
-async def delete_image(image_name: str):
-    try:
-        os_remove(os_path_join(UPLOAD_FOLDER,image_name))
-        return {"Success": "Image deleted from server"}
-    except:
-        return {"Error": "Image not found on server"}
   
