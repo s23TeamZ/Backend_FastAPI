@@ -115,6 +115,7 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
     results = {}
     threads = []
     log_msgs = {}
+    dyn_oth_log = {}
     def check_dns():
         init_time = time.time()
         try:
@@ -156,7 +157,7 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
         try:
             csp_status, csp_score, log_m = csp.check_csp_headers(url_d["URL"])
             results["csp"] = csp_score
-            log_msgs["csp"] = log_m
+            dyn_oth_log["csp"] = log_m
         except:
             results["csp"] = 0
         print(f"[+] Time - CSP : {time.time() - init_time}")
@@ -166,7 +167,7 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
         try:
             ssl_status, ssl_score, log_m = ssl.check_website(url_d["URL"], url_d["Domain"])
             results["ssl"] = ssl_score
-            log_msgs["ssl"] = log_m
+            dyn_oth_log["ssl"] = log_m
         except:
             results["ssl"] = 0
         print(f"[+] Time - SSL : {time.time() - init_time}")
@@ -184,13 +185,38 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
                 res_json = dyn_test_status.json()   # add final score in json
             except:
                 raise Exception("Data recieved is not JSON")                          
-            results["Dynamic_tests"] = res_json["score"]
-            log_msgs["Dynamic_tests"] = ''
+            results["Dynamic_tests"] = res_json
+            # log_msgs["Dynamic_tests"] = ''
         except Exception as e:
-            results["Dynamic_tests"] = 0
-            log_msgs["Dynamic_tests"] = f"ERROR : {e}"
+            results["Dynamic_tests"] = {'score':0}
+            # log_msgs["Dynamic_tests"] = f"ERROR : {e}"
         print(f"[+] Time - Dynamic Testing : {time.time() - init_time}")
 
+    def display_dynamic_test():
+        if(results["Dynamic_tests"]['score']==0):
+            return
+        dtr = results["Dynamic_tests"]
+        print(f"[~] Dynamic Test check : ")
+        for log in dyn_oth_log:
+            print(f"[~] {log} Check : [{results[log]}] :")
+            print("\t",end='')
+            print(dyn_oth_log[log])
+        print(f" Aggregate Score for below : [{dtr['score']}]")
+        print(f"[~] Download Check : ")
+        if(dtr['dwn_data'][0]):
+            print(f"\tURL Downloads Files, Type: {dtr['dwn_data'][1]}, Size: {dtr['dwn_data'][2]}, log: {dtr['dwn_data'][3]}")
+        else:
+            print("\tURL does not download any Files")
+        print("[~] Ads/Tracker Check : ")
+        if(dtr['chrome_data'][0]):
+            print(f"\tPercentage of Ads/Trackers : {dtr['chrome_data'][1]}")
+        else:
+            print(f"\tError: log : {dtr['chrome_data'][0]}")
+        print("[~] Phishing Check : ")
+        if(dtr['phishing_data'][0]):
+            print(f"\tPercentage of likely Phishing : {dtr['phishing_data'][1]} , Website: {dtr['phishing_data'][2][:-5]}")
+        else:
+            print(f"\tNot Phishing website")
     check_list = [check_virustotal, check_alien_vault]
     if(not flag):
         check_list =  [check_dns] + check_list + [check_csp, check_ssl]
@@ -222,13 +248,14 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
     for log in log_msgs:
         print(f"[~] {log} check : [{results[log]}] :")
         print(log_msgs[log])
+    display_dynamic_test()
     total_score = 0
     total_score+= results["DNS"]*0.25*0.4
     total_score+= results["VirusTotal"]*0.5*0.65*0.4
     total_score+= results["AlienVault"]*0.5*0.65*0.4
     total_score+= results["csp"]*0.15*0.6
     total_score+= results["ssl"]*0.4*0.6
-    total_score+= results["Dynamic_tests"]
+    total_score+= results["Dynamic_tests"]['score']
     results["TOTAL_SCORE"] = total_score
     return results
     

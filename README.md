@@ -69,9 +69,10 @@ Active Tests - 60%
     TLS Certificates - 40%
         Certificate Expired - 0
         else SSL Version TLSv1.2, v1.3 - 100, TLSv1.1 - 70, TLSv1.0 - 35, SSLv* - 10
-    Any Downloads - 30%
+    Any Downloads - 25%
     CSP Headers - 15%
-    AdBlocker comparison - 15%
+    AdBlocker comparison - 10%
+    Phishing Detector - 10%
 ```
 ```
 DNS - 8.574 (10)	0.25*0.4
