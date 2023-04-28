@@ -18,33 +18,33 @@ def check_malicious_main(params):
         if(params['ip']):
             alerts = get_malicious.ip(otx, params['ip'])
             if len(alerts) > 0:
-                return False, f'Identified as potentially malicious ->\n      {str(alerts)}'
+                return False, len(alerts), f'Identified as potentially malicious ->\n      {str(alerts)}'
             else:
-                return True, 'Unknown or not identified as malicious'
+                return True, 0, 'Unknown or not identified as malicious'
 
     if("host" in param_keys):
         if(params['host']):
             alerts = get_malicious.hostname(otx, params['host'])
             if len(alerts) > 0:
-                return False, f'Identified as potentially malicious ->\n      {str(alerts)}'
+                return False, len(alerts), f'Identified as potentially malicious ->\n      {str(alerts)}'
             else:
-                return True, 'Unknown or not identified as malicious'
+                return True, 0, 'Unknown or not identified as malicious'
 
     if("url" in param_keys):
         if(params['url']):
             alerts = get_malicious.url(otx, params['url'])
             if len(alerts) > 0:
-                return False, f'Identified as potentially malicious ->\n      {str(alerts)}'
+                return False, len(alerts), f'Identified as potentially malicious ->\n      {str(alerts)}'
             else:
-                return True, 'Unknown or not identified as malicious'
+                return True, 0, 'Unknown or not identified as malicious'
 
     if("hash" in param_keys):
         if(params['hash']):
             alerts =  get_malicious.file(otx, params['hash'])
             if len(alerts) > 0:
-                return False, f'Identified as potentially malicious ->\n      {str(alerts)}'
+                return False, len(alerts), f'Identified as potentially malicious ->\n      {str(alerts)}'
             else:
-                return True, 'Unknown or not identified as malicious'
+                return True, 0, 'Unknown or not identified as malicious'
                 
     
     if("file" in param_keys):
@@ -52,36 +52,44 @@ def check_malicious_main(params):
             hash = hashlib.md5(open(params['file'], 'rb').read()).hexdigest()
             alerts =  get_malicious.file(otx, hash)
             if len(alerts) > 0:
-                return False, f'Identified as potentially malicious ->\n      {str(alerts)}'
+                return False, len(alerts), f'Identified as potentially malicious ->\n      {str(alerts)}'
             else:
-                return True, 'Unknown or not identified as malicious'
+                return True, 0, 'Unknown or not identified as malicious'
 
 def check_malicious(url, domain=None, ipaddr=None):
     url_c = True
     domain_c = True
     ip_c = True
     result_c = True
+    tot_score =  0
+    tot_cnt = 0
     log_msgs = ''
     try:
-        result_c, log_m = check_malicious_main({'url':url})
+        result_c, tot_alrt, log_m = check_malicious_main({'url':url})
+        tot_score+= max(100-(tot_alrt*50),0)
+        tot_cnt+=1
         log_msgs += f"URL : {log_m}\n"
     except:
         pass
     if(domain!=None and domain!=''):
         try:
-            domain_c, log_m = check_malicious_main({'host':domain})
+            domain_c, tot_alrt, log_m = check_malicious_main({'host':domain})
+            tot_score+= max(100-(tot_alrt*50),0)
+            tot_cnt+=1
             result_c = result_c & domain_c
             log_msgs += f"Host : {log_m}\n"
         except:
             pass
     if(ipaddr!=None and ipaddr!='' and ipaddr!=domain):    
         try:
-            ip_c, log_m = check_malicious_main({'ip':ipaddr})
+            ip_c, tot_alrt, log_m = check_malicious_main({'ip':ipaddr})
+            tot_score+= max(100-(tot_alrt*50),0)
+            tot_cnt+=1
             result_c = result_c & ip_c
             log_msgs += f"IP : {log_m}\n"
         except:
             pass
-    return result_c, log_msgs
+    return result_c, 0 if(tot_cnt==0) else (tot_score/tot_cnt), log_msgs
 
 # if __name__ == "__main__":
 #     params={'ip':'185.209.29.94'}

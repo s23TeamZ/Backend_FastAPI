@@ -4,7 +4,7 @@ from fastapi import FastAPI, UploadFile, File, Form
 from shutil import copyfileobj as shutil_copyfileobj
 from os.path import join as os_path_join
 from os import remove as os_remove
-from functions import get_file_name, qr_reader, url_testing_func, qr_reader1
+from functions import get_file_name, qr_reader, url_testing_func, qr_reader1, format_return_opt
 from features import categorize_qr_type
 import time
 import uuid
@@ -28,7 +28,7 @@ async def upload_image(file: UploadFile = File(...)):
     with open(os_path_join(UPLOAD_FOLDER, file_name), "wb") as buffer:
         shutil_copyfileobj(file.file, buffer)
     text_found_l = qr_reader(os_path_join(UPLOAD_FOLDER, file_name))
-    return_data["Text Detected"] = text_found_l
+    # return_data["Text Detected"] = text_found_l
     print(f"[+] Text Detected : \n{text_found_l}")
     qr_data_ret = categorize_qr_type.categorize_qr(text_found_l)
     print(f"[+] {qr_data_ret}")
@@ -43,10 +43,15 @@ async def upload_image(file: UploadFile = File(...)):
     results_testing = url_testing_func(url_list)
     for qr_idx in results_testing:
         return_data[qr_idx]["Result_p"] = results_testing[qr_idx]['results']
-        if(results_testing[qr_idx].get('url_data', None)!=None):
-            return_data[qr_idx]["Data_Updated"] = results_testing[qr_idx]['url_data']
+        return_data[qr_idx]["Data"] = results_testing[qr_idx]['data']
+        # if(results_testing[qr_idx].get('url_data', None)!=None):
+        #     return_data[qr_idx]["Data_Updated"] = results_testing[qr_idx]['url_data']
         # print(results_testing[qr_idx]) #print the result of the URL tests 
-    return return_data
+    # return data 
+    return_data = format_return_opt(return_data)
+    print("[+] Return data :")
+    print({"opt":return_data}) 
+    return {"opt":return_data}
 
 
 
@@ -68,7 +73,7 @@ async def upload_url(text: str = Form()):
     # print(f"[+] Image Name : {file_name}")
     # text_found_l = qr_reader(os_path_join(UPLOAD_FOLDER, file_name))
     text_found_l = qr_reader1(text)
-    return_data["Text Detected"] = text_found_l
+    # return_data["Text Detected"] = text_found_l
     print(f"[+] Text Detected : \n{text_found_l}")
     qr_data_ret = categorize_qr_type.categorize_qr(text_found_l)
     print(f"[+] {qr_data_ret}")
@@ -82,26 +87,16 @@ async def upload_url(text: str = Form()):
     results_testing = url_testing_func(url_list)
     for qr_idx in results_testing:
         return_data[qr_idx]["Result_p"] = results_testing[qr_idx]['results']
-        if(results_testing[qr_idx].get('url_data', None)!=None):
-            return_data[qr_idx]["Data_Updated"] = results_testing[qr_idx]['url_data']
+        return_data[qr_idx]["Data"] = results_testing[qr_idx]['data']
+        # if(results_testing[qr_idx].get('url_data', None)!=None):
+        #     return_data[qr_idx]["Data_Updated"] = results_testing[qr_idx]['url_data']
         print(results_testing[qr_idx]) #print the result of the URL tests 
     # return data 
+    return_data = format_return_opt(return_data)
     print("[+] Return data :")
-    print(return_data)
+    print({"opt":return_data})
     # time.sleep(2)
-    return return_data
+    return {"opt":return_data}
     # return json.dumps(return_data, indent=4)
 
-@app.post("/qr_read/{image_name}")
-async def image_qr_reader(image_name: str):
-    text_found = qr_reader(os_path_join(UPLOAD_FOLDER, image_name))
-    return {"Text Detected" : text_found}
-
-@app.delete("/delete_image/{image_name}")
-async def delete_image(image_name: str):
-    try:
-        os_remove(os_path_join(UPLOAD_FOLDER,image_name))
-        return {"Success": "Image deleted from server"}
-    except:
-        return {"Error": "Image not found on server"}
   

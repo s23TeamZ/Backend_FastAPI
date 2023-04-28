@@ -4,12 +4,12 @@ import re
 
 def test_vcard(text: str):
     if(text[0:11].upper() == "BEGIN:VCARD"):
-        return True, {"Text": text}
+        return True, f"VCARD Details :\n {text}\n"
     return False, {}
 
 def test_mecard(text: str):
     if(text[0:7].upper() == "MECARD:"):
-        return True, {"Text": text}
+        return True, f"MECARD Details :\n {text}\n"
     return False, {}
 
 def test_coin(text: str):
@@ -17,13 +17,13 @@ def test_coin(text: str):
     if(detect==None):
         return False, {}
     detect_g = detect.groups()
-    return_val = {}
-    return_val["Currency"] = detect_g[0]
-    return_val["Coin Address"] = detect_g[1]
+    return_val = ""
+    return_val+= f"Currency :\n {detect_g[0]}\n\n"
+    return_val+= f"Coin Address :\n {detect_g[1]}\n\n"
     if(detect_g[3]!=None):
-        return_val["Amount"] = detect_g[3]
+        return_val+= f"Amount :\n {detect_g[3]}\n\n"
     if(detect_g[5]!=None):
-        return_val["Message"] = detect_g[5]
+        return_val+= f"Message :\n {detect_g[5]}\n\n"
     return True, return_val
 
 def test_sms(text: str):
@@ -31,15 +31,15 @@ def test_sms(text: str):
     if(detect==None):
         return False, {}
     detect_g = detect.groups()
-    return_val = {}
-    return_val["Phone No"] = detect_g[1]
+    return_val = ""
+    return_val+= f"Phone No :\n {detect_g[1]}\n\n"
     if(detect_g[2]!=None):
-        return_val["Message"] = detect_g[2]
+        return_val+= f"Message :\n {detect_g[2]}\n"
     return True, return_val
 
 def test_phone(text: str):
     if(text[0:4].lower() == "tel:"):
-        return True, {"Phone_No": text[4:]}
+        return True, f"Phone_No :\n {text[4:]}\n"
     return False, {}
     
 def test_wifi(text: str):
@@ -56,22 +56,26 @@ def test_wifi(text: str):
     return_val["Password"] = pass_s.groups()[0] if(pass_s!=None) else ""
     return_val["Encryption"] = enc_s.groups()[0] if(enc_s!=None) else "nopass"
     return_val["Hidden"] = ("false" if(hidd_s.groups()[0]=='') else hidd_s.groups()[0]) if(hidd_s!=None) else "false"
-
-    return True, return_val
+    ret_s = ""
+    for i,j in return_val.items():
+        ret_s+=f"{i} :\n {j}\n\n"
+    return True, ret_s
 
 def test_vevent(text: str):
     if(text[0:12].upper() == "BEGIN:VEVENT"):
-        return True, {"Text": text}
+        return True, f"Event Details :\n {text}\n"
     return False, {}
 
 def test_email(text: str):
     if(text[0:6].upper() == "MATMSG"):
-        return True, {"Text": text}     ## TODO extract email, subject, body of mail
+        return True, f"Email Details :\n {text}\n"     
     return False, {}
 
 def test_email1(text: str):
-    if(text[0:5].upper() == "mail:"):
-        return True, {"Email": text[5:]}
+    if(text[0:5].lower() == "mail:"):
+        return True, f"Email :\n {text[5:]}\n"
+    elif(text[0:7].lower() == "mailto:"):
+        return True, f"Email :\n {text[7:]}\n"
     return False, {}
 
 def test_url(text: str):
@@ -89,7 +93,7 @@ def test_url(text: str):
     if(web_url_len > 1):
         return_val["File"]["check"] = True
         return_val["File"]["Name"] = web_url[-1]
-        return_val["File"]["Ext"] = web_url[-1][web_url[-1].find('.'):] # fix false negatives
+        return_val["File"]["Ext"] = web_url[-1][web_url[-1].find('.'):] 
     return True, return_val
     
 
@@ -107,7 +111,7 @@ def categ_qr_helper(text: str):
         if(ret_bool==True):
             return [func_name, ret_val]
     
-    return ["Text", {"Text":text}]
+    return ["Text", f"Text :\n {text}\n"]
 
 def categorize_qr(text_l):
     return_v = []
