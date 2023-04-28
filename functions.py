@@ -17,6 +17,44 @@ def get_file_name(file_name: str) -> str:
         return f"{uuid.uuid4().hex[:10].upper()}{file_name[file_name.rfind('.'):]}"
     return ""
 
+def format_return_opt(rtd):
+    final_d = []
+    def ext_url_data(qq):
+        fin_s = f"URL : {qq['Data']['URL']}\n\n"
+        if(qq['Data'].get('Redirect URL',None)!=None):
+            fin_s+=f"Redirect URL :\n {qq['Data']['Redirect URL']}\n\n"
+        if(qq['Data']['log']!=''):
+            fin_s+=f"Msg :\n {qq['Data']['log']}\n\n"
+        qq_r = qq['Result_p']
+        if(qq_r.get('DB',False)==True):
+            fin_s+=f"Database :\n URL found in malicious list DB\n\n"
+        else:
+            if(qq_r.get('dwn_test',[False])[0] == False):
+                fin_s+=f"Downloads :\n URL does not download anything\n\n"
+            else:
+                fin_s+=f"Downloads :\n URL downloads filetype - {qq_r['dwn_test'][1]} ; size - {qq_r['dwn_test'][2]}"
+                fin_s+= "\n\n" if(qq_r['dwn_test'][3]=='') else f" ; filename - {qq_r['dwn_test'][3]}\n\n"
+            if(qq_r.get('phishing_data',[False])[0] == False):
+                fin_s+=f"Phishing :\n URL is not likely Phishing site\n\n"
+            else:
+                fin_s+=f"Phishing :\n URL is likely Phishing site matches {qq_r['phishing_data'][1]}% of {qq_r['phishing_data'][2][:-5]}\n\n"
+        return fin_s, qq['Data']['URL']
+    for qr in rtd:
+        qr_d = {}
+        if(rtd[qr]['QR Type']=="URL"):
+            qr_d['QR Type'] = "URL"
+            qr_d['data'], url_ext = ext_url_data(rtd[qr])
+            qr_d['score'] = rtd[qr]['Result_p']['TOTAL_SCORE']
+            qr_d['URL'] = url_ext
+        else:
+            qr_d['QR Type'] = rtd[qr]['QR Type']
+            qr_d['data'] = rtd[qr]['Data']
+            qr_d['score'] = 100
+            qr_d['URL'] = ''
+        final_d.append(qr_d)
+    return final_d
+
+
 def qr_cv_detect(img) -> str:
     detector = cv2.QRCodeDetector()
     retrivel, decoded_info, points,st_qrcode = detector.detectAndDecodeMulti(img)
@@ -82,37 +120,49 @@ def url_testing_func(url_list: dict):
     results = {}
     for qr_idx in url_list:
         url1 = url_list[qr_idx]["URL"]
+        url_access_flag = False
         results[qr_idx] = {}
+        results[qr_idx]['data'] = {'URL':url1, 'log':''}
         results[qr_idx]['results'] = {"TOTAL_SCORE":0}
         r_url, r_score =check_redirection.check_redirect(url1)
         if(r_url==False):
-            results[qr_idx]['results'] = {"ERROR":"URL Redirection error"}
+            url_access_flag = True
+            results[qr_idx]['data']['log'] = "Cannot Access the URL"
             
         elif(r_url!=url1):
             __1, url_data = categorize_qr_type.test_url(r_url)
             url_list[qr_idx] = url_data
-            results[qr_idx]['url_data'] = url_data 
+            results[qr_idx]['data']['Redirect URL'] = url_list[qr_idx]["URL"]
         print(f"\n\n[+] Checks for - {url_list[qr_idx]['URL']}\n")
         db_ck, db_log = dbcheck.db_check(url=url_list[qr_idx]["URL"], 
                                         domain=url_list[qr_idx]["Domain"])
         print(f"[~] DB check : [{db_ck}] :")
         print(db_log)
+        total_score_tests = 0
         if(db_ck == False):
-            results[qr_idx]['results'].update(url_testing_core_func(url_list[qr_idx],
-                        True if(results[qr_idx]['results'].get("ERROR",None)!=None) else False,
-                        dyn_test = True))
-            if((not results[qr_idx]['results']["VirusTotal"] or not results[qr_idx]['results']["AlienVault"]) and url_list[qr_idx]["Domain"] not in ['google.com']):
+            # results[qr_idx]['results'].update
+            results_tests = url_testing_core_func(url_list[qr_idx],
+                        url_access_flag,
+                        dyn_test = True)
+            if((results_tests["VirusTotal"]<50 or results_tests["AlienVault"]<75) and url_list[qr_idx]["Domain"] not in ['google.com']):
                 dbcheck.add_to_db(url=url_list[qr_idx]["URL"], domain=url_list[qr_idx]["Domain"])
                 print("[~] Added to Malicious Database")
+            if(results_tests["Dynamic_tests"]['score']!=0):
+                dwn_test_file = url_list[qr_idx]["File"]["Name"] if(results_tests["Dynamic_tests"]['dwn_data'][0] and url_list[qr_idx]["File"]["check"]) else ''
+                results[qr_idx]['results']['dwn_test'] = results_tests["Dynamic_tests"]['dwn_data'][:-1] + [dwn_test_file]
+                results[qr_idx]['results']['phishing_data'] = results_tests["Dynamic_tests"]['phishing_data'][:-1]
+            total_score_tests = results_tests['TOTAL_SCORE']
         else:
             results[qr_idx]['results'].update({'DB':True})
-        results[qr_idx]['results']["TOTAL_SCORE"] = results[qr_idx]['results']["TOTAL_SCORE"] + r_score*0.1*0.4
-        results[qr_idx]['results']["URL Redirect"] = r_score
+            r_score = 0
+        results[qr_idx]['results']["TOTAL_SCORE"] = total_score_tests + r_score*0.1*0.4
+        
+        # results[qr_idx]['results']["URL Redirect"] = r_score
         print(f"[=] Results : {results[qr_idx]}\n\n")
     return results
 
 def url_testing_core_func(url_d, flag=False, dyn_test=False):
-    results = {}
+    results = {"DNS":0, "VirusTotal":0, "AlienVault":0,"csp":0, "ssl":0,"Dynamic_tests":{'score':0}}
     threads = []
     log_msgs = {}
     dyn_oth_log = {}
@@ -193,7 +243,7 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
         print(f"[+] Time - Dynamic Testing : {time.time() - init_time}")
 
     def display_dynamic_test():
-        if(results["Dynamic_tests"]['score']==0):
+        if(results["Dynamic_tests"].get('score',0)==0):
             return
         dtr = results["Dynamic_tests"]
         print(f"[~] Dynamic Test check : ")
@@ -203,23 +253,29 @@ def url_testing_core_func(url_d, flag=False, dyn_test=False):
             print(dyn_oth_log[log])
         print(f" Aggregate Score for below : [{dtr['score']}]")
         print(f"[~] Download Check : ")
-        if(dtr['dwn_data'][0]):
+        if(len(dtr['dwn_data'])==0):
+            pass
+        elif(len(dtr['dwn_data'])!=0 and dtr['dwn_data'][0]):
             print(f"\tURL Downloads Files, Type: {dtr['dwn_data'][1]}, Size: {dtr['dwn_data'][2]}, log: {dtr['dwn_data'][3]}")
         else:
-            print("\tURL does not download any Files")
+            print("\nURL Does not Downlaod Files")
         print("[~] Ads/Tracker Check : ")
-        if(dtr['chrome_data'][0]):
+        if(len(dtr['chrome_data'])==0):
+            pass
+        elif(dtr['chrome_data'][0]):
             print(f"\tPercentage of Ads/Trackers : {dtr['chrome_data'][1]}")
         else:
             print(f"\tError: log : {dtr['chrome_data'][0]}")
         print("[~] Phishing Check : ")
-        if(dtr['phishing_data'][0]):
+        if(len(dtr['phishing_data'])==0):
+            pass
+        elif(len(dtr['phishing_data'])!=0 and dtr['phishing_data'][0]):
             print(f"\tPercentage of likely Phishing : {dtr['phishing_data'][1]} , Website: {dtr['phishing_data'][2][:-5]}")
         else:
-            print(f"\tNot Phishing website")
-    check_list = [check_virustotal, check_alien_vault]
+            print(f"\nNot Likely Phishing Website")
+    check_list = [check_virustotal, check_alien_vault, check_dns]
     if(not flag):
-        check_list =  [check_dns] + check_list + [check_csp, check_ssl]
+        check_list =  check_list + [check_csp, check_ssl]
         if(dyn_test):
             check_list = [dynamic_testing] + check_list
 
